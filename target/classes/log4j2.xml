@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，
+ 你会看到log4j2内部各种详细输出。可以设置成OFF(关闭)或Error(只输出错误信息)
+-->
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!-- PatternLayout自定义日志布局：
+
+%d{yyyy-MM-dd HH:mm:ss, SSS} : 日志生产时间,输出到毫秒的时间
+%-5level : 输出日志级别，-5表示左对齐并且固定输出5个字符，如果不足在右边补0
+%c : logger的名称(%logger)
+%t : 输出当前线程名称
+%p : 日志输出格式
+%m : 日志内容，即 logger.info("message")
+%n : 换行符
+%C : Java类名(%F)
+%L : 行号
+%M : 方法名
+%l : 输出语句所在的行数, 包括类名、方法名、文件名、行数
+hostName : 本地机器名
+hostAddress : 本地ip地址 -->
+
+<!--  RollingFile节点用来定义超过指定条件自动删除旧的创建新的Appender.
+name:指定Appender的名字.
+fileName:指定输出日志的目的文件带全路径的文件名.
+PatternLayout:输出格式，不设置默认为:%m%n.
+filePattern : 指定当发生Rolling时，文件的转移和重命名规则.
+Policies:指定滚动日志的策略，就是什么时候进行新建日志文件输出日志.
+SizeBasedTriggeringPolicy:Policies子节点，基于指定文件大小的滚动策略，size属性用来定义每个日志文件的大小.
+DefaultRolloverStrategy:用来指定同一个文件夹下最多有几个日志文件时开始删除最旧的，创建新的(通过max属性)。
+TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
+	注意filePattern中配置的文件重命名规则是${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i，
+	最小的时间粒度是mm，即分钟，TimeBasedTriggeringPolicy指定的size是1，结合起来就是每1分钟生成一个新文件。
+	如果改成%d{yyyy-MM-dd HH}，最小粒度为小时，则每一个小时生成一个文件。
+	如果是一直有日志记录的情况下，每隔最小粒度乘以size时间将会生成一个文件，但若没有输入，则每隔最小粒度乘以size时间类不会有文件生成
+-->
+
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="App">classtime</Property>
+        <Property name="logDir">c:/logs/classtime</Property>
+        <Property name="splitSize">100 MB</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 输出控制台日志的配置 -->
+        <Console name="console" target="SYSTEM_OUT">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        
+        <!-- 存储所有debug信息  针对user类-->
+        <RollingRandomAccessFile name="userDebugLog" fileName="${logDir}/user/${App}-user-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/user/$${date:yyyy-MM}/${App}-user-debug-%d{yyyy-MM-dd}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingRandomAccessFile>
+        
+        <!-- 存储所有debug信息  针对room类-->
+        <RollingRandomAccessFile name="roomDebugLog" fileName="${logDir}/room/${App}-room-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/room/$${date:yyyy-MM}/${App}-room-debug-%d{yyyy-MM-dd}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingRandomAccessFile>
+
+		<!-- 存储所有debug信息  针对RedisKeyExpirationListener类-->
+        <RollingRandomAccessFile name="redisDebugLog" fileName="${logDir}/redis/${App}-redis-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/redis/$${date:yyyy-MM}/${App}-redis-debug-%d{yyyy-MM-dd}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingRandomAccessFile>        
+        
+        <!-- 存储所有debug信息  针对time类-->
+        <RollingRandomAccessFile name="timeDebugLog" fileName="${logDir}/time/${App}-time-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/time/$${date:yyyy-MM}/${App}-time-debug-%d{yyyy-MM-dd}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingRandomAccessFile>
+        
+        <!-- 存储所有debug信息  默认的debug，不针对任何特定类-->
+        <RollingRandomAccessFile name="debugLog" fileName="${logDir}/${App}-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-debug-%d{MM-dd-yyyy}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="10"/>
+        </RollingRandomAccessFile>
+
+        <!-- 打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
+        <!-- 存储所有info信息  -->
+        <RollingRandomAccessFile name="infoLog" fileName="${logDir}/${App}-info.log" immediateFlush="true"
+                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-info-%d{yyyy-MM-dd HH-mm-ss}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="10" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="10"/>
+        </RollingRandomAccessFile>
+        
+        
+        <!-- 打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
+        <!-- 存储所有warn信息  -->
+        <RollingRandomAccessFile name="warnLog" fileName="${logDir}/${App}-warn.log" immediateFlush="true"
+                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-warn-%d{MM-dd-yyyy}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有warn信息  -->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="50"/>
+        </RollingRandomAccessFile>
+
+        <!-- 存储所有error信息 -->
+        <RollingRandomAccessFile name="errorLog" fileName="${logDir}/${App}-error.log" immediateFlush="true"
+                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-error-%d{MM-dd-yyyy}-%i.log.gz"
+                                 append="false">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 只记录error级别信息 -->
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="50"/>
+        </RollingRandomAccessFile>
+        
+        
+    </Appenders>
+
+    <Loggers>
+        <!-- root logger 配置,全局配置，默认所有的Logger都继承此配置 -->
+        <Root  level="trace">
+            <AppenderRef ref="console"/>
+        </Root>
+
+        <logger name="control.user" level="info" additivity="false">
+        	<appender-ref ref="userDebugLog"/>
+        </logger>
+        
+        <logger name="control.room" level="info" additivity="false">
+        	<appender-ref ref="roomDebugLog"/>
+        </logger>
+        
+        <logger name="redis" level="info" additivity="false">
+        	<appender-ref ref="redisDebugLog"/>
+        </logger>
+        
+        <logger name="control.time" level="info" additivity="false">
+        	<appender-ref ref="timeDebugLog"/>
+        </logger>
+
+    </Loggers>
+</Configuration>
