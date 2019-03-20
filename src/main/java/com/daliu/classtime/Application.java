@@ -2,6 +2,8 @@ package com.daliu.classtime;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -18,7 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableCaching
 @EnableSwagger2             //启动swagger注解
 public class Application {
-	
+	//extends SpringBootServletInitializer
 
     public static void main(String[] args) {
         // 程序启动入口
@@ -28,6 +30,17 @@ public class Application {
         System.out.println("******   springboot启动成功!   ****** ");
         
     }
+    
+    /**
+     * 打包发布外部Tomcat
+     */
+    /*
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+    //注意这里要指向原先用main方法执行的Application启动类
+          return builder.sources(Application.class);
+     }*/
+
     
     
     /**

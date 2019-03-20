@@ -3,7 +3,6 @@ package com.daliu.classtime.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -50,6 +49,10 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
     	try {
     		//约定key的前四位用于表示标识信息
     		String str=message.toString();
+    		
+    		//防止有key的长度小于4的值过来时报错
+    		if(str.length()<4) return;
+    		
         	String key=str.substring(0,4);
         	String value=str.substring(4);
         	//System.out.println(key+"---"+value);
@@ -67,8 +70,9 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
     			break;
 
     		default:
-    			logger.info(message.toString());
-    			System.out.println("RedisKeyExpirationListener unknow :"+str);
+    			//可能还有排行榜中的信息失效，这里暂不操心
+    			//logger.info(message.toString());
+    			//System.out.println("RedisKeyExpirationListener unknow :"+str);
     			break;
     		}
 		} catch (Exception e) {

@@ -8,9 +8,10 @@ import javax.persistence.Table;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.ScopedProxyMode;
 
 @Component
-@Scope("prototype")
+@Scope(value="request",proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Entity
 @Table(name="room")
 public class RoomDoMain {

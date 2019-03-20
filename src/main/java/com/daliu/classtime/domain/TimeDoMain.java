@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Entity
 @Table(name="time")
 public class TimeDoMain {
+	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

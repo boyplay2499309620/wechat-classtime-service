@@ -1,7 +1,6 @@
 package com.daliu.classtime.control;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.daliu.classtime.domain.RoomDoMain;
-import com.daliu.classtime.domain.RoomPeopleDoMain;
 import com.daliu.classtime.service.RoomServiceimp;
-import com.daliu.classtime.test.internetTest;
 import com.daliu.classtime.utils.ErrorMsg;
 
 import io.swagger.annotations.Api;
@@ -99,9 +96,12 @@ public class RoomControl {
 		long startTime=System.currentTimeMillis();
 		Map<String,String> map=new HashMap<String, String>();
 		try{
+			System.out.println("createRoom control : "+Thread.currentThread().getName());
 			if(number==0){
 				//用户没有指定房间号
+				System.out.println("roomcontrol111"+room);
 				room=rooms.createNum(openId,remark);
+				System.out.println("roomcontrol222"+room);
 				number=room.getRoomNumber();
 				map.put("status","0");
 				map.put("number",room.getRoomNumber().toString());
@@ -125,7 +125,7 @@ public class RoomControl {
 				map.put("status","3");
 			}
 			
-			long endTime=System.currentTimeMillis();
+			//long endTime=System.currentTimeMillis();
 			//logger.info(openId+"---"+number+"---"+remark+"---"+(endTime-startTime)+"ms"+map);
 			return map;
 		}catch (Exception e) {
@@ -174,7 +174,31 @@ public class RoomControl {
 			return null;
 		}
 		
-		
-		
 	}
+	
+	
+	//发送邮件
+	@RequestMapping(value="/sendEmail",method=RequestMethod.GET)
+	@ApiOperation("将房间里的记录以电子邮件的形式发送")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true ),
+		@ApiImplicitParam(paramType="query",name="roomId",value="房间索引",required=true ),
+		@ApiImplicitParam(paramType="query",name="emailAddress",value="邮件地址，经过校验了",required=true )
+	})
+	public void SendEmail(@RequestParam String openId,
+			@RequestParam Integer roomId,
+			@RequestParam String emailAddress){
+		//System.out.println(roomId+"---"+emailAddress);
+		try {
+            String string=rooms.SendEmail(openId, roomId, emailAddress);
+            logger.info(openId+"---"+roomId+"---"+roomId+"---"+string);
+            //System.out.println("发送成功！"+string);
+		} catch (Exception e) {
+			ErrorMsg msg=new ErrorMsg();
+			logger.error(openId+"---"+roomId+"---"+roomId+"---"+msg.getStackTrace(e));
+			System.out.println(openId+"---"+roomId+"---"+roomId+"---"+msg.getStackTrace(e));
+		}
+	}
+	
+	
 }

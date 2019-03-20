@@ -1,21 +1,23 @@
 package com.daliu.classtime.service;
 
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.aspectj.apache.bcel.generic.ReturnaddressType;
-import org.hibernate.loader.plan.exec.process.spi.ReturnReader;
+import javax.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,6 @@ import com.daliu.classtime.domain.RoomDoMain;
 import com.daliu.classtime.domain.RoomPeopleDoMain;
 import com.daliu.classtime.domain.UserDoMain;
 import com.daliu.classtime.service.inservice.InRoomService;
-import com.daliu.classtime.test.internetTest;
 
 
 
@@ -69,6 +70,15 @@ public class RoomServiceimp implements InRoomService{
 	
 	@Autowired 
 	private RoomPeopleDoMain roomPeopleDoMain1;
+	
+	@Autowired
+	private GenerateXls generateXls;
+	
+	@Autowired
+    private JavaMailSender mailSender; //自动注入的Bean 
+
+    @Value("${spring.mail.username}")
+    private String Sender; //读取配置文件中的参数
 	
 	//findByRoomId(Integer roomId)
 	public RoomDoMain findByRoomId(Integer roomId){
@@ -124,10 +134,16 @@ public class RoomServiceimp implements InRoomService{
 		
 	}
 	
+	public void use(){
+		System.out.println("room    "+room);
+		System.out.println("room1    "+room1);
+	}
+	
 	//创建一个房间,系统生成房间号
 	@Transactional
 	public RoomDoMain createNum(String openId,String remark){
 		try {
+			System.out.println("createRoom service : "+Thread.currentThread().getName());
 			//找到一个可用的房间号
 			Boolean flag=true;
 			int a=0;
@@ -142,10 +158,13 @@ public class RoomServiceimp implements InRoomService{
 			}
 			
 			//现将该用户上一次创建的还没有结束房间标志   为结束
+			System.out.println("room1111begain"+room1);
 			room1=roomDao.findByOpenIdAndRoomState(openId,1);
+			System.out.println("room1111end"+room1);
 			if(room1!=null){
 				updateRoomState(room1);
 			}
+			System.out.println("service111"+room);
 			
 			//构造一条新纪录
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
@@ -154,9 +173,10 @@ public class RoomServiceimp implements InRoomService{
 			room.setRemark(remark);
 			room.setOpenId(openId);
 			room.setRoomPeoples(0);
-			room.setRoomId(null);
+			//room.setRoomId(null);
 			room.setCreateTime(df.format(new Date()));
-			
+			System.out.println("service222"+room);
+			use();
 			//return(roomDao.save(room));
 			//不立即刷新则加入房间时会报错，因为查不到房间
 			roomDao.saveAndFlush(room);
@@ -195,7 +215,7 @@ public class RoomServiceimp implements InRoomService{
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 				room.setOpenId(openId);
 				room.setRemark(remark);
-				room.setRoomId(null);
+				//room.setRoomId(null);
 				room.setRoomNumber(number);
 				room.setRoomState(1);
 				room.setRoomPeoples(0);
@@ -236,7 +256,7 @@ public class RoomServiceimp implements InRoomService{
 	
 	//进入房间
 	@Transactional
-	synchronized public RoomDoMain getRoom(String openId,Integer roomNumber){
+	public RoomDoMain getRoom(String openId,Integer roomNumber){
 		try {
 			//判断房间是否存在，不存在返回null，否则返回room信息
 			
@@ -255,13 +275,12 @@ public class RoomServiceimp implements InRoomService{
 					//查询姓名
 					user=users.findByOpenId(openId);
 					
-					roomPeopleDoMain1.setId(null);
+					//roomPeopleDoMain1.setId(null);
 					roomPeopleDoMain1.setOpenId(openId);
 					roomPeopleDoMain1.setRoomId(room.getRoomId());
 					roomPeopleDoMain1.setBegainTime(df.format(new Date()));
-					//roomPeopleDoMain1.setName(user.getSchoolName());
 					roomPeopleDoMain1.setTimes(0);
-					//roomPeopleDoMain1.setState(0);
+					roomPeopleDoMain1.setSchoolId(user.getSchoolId());
 					if(user.getSchoolName()==null||user.getSchoolName().equals(""))
 						//要是没有绑定学校姓名，就用昵称
 						roomPeopleDoMain1.setName(user.getName());
@@ -320,6 +339,40 @@ public class RoomServiceimp implements InRoomService{
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+	
+	//发送邮件
+	public String SendEmail(String openId,Integer roomId,String emailAddress) throws Exception{
+		
+		try {
+			long begainTime=System.currentTimeMillis();
+			MimeMessage message = null;
+			String path=generateXls.CreateXls(roomId);
+			
+			long xlsTime=System.currentTimeMillis();
+			
+			message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(Sender);
+            helper.setTo(emailAddress);
+            helper.setSubject("主题：带附件的邮件");
+            helper.setText("带附件的邮件内容");
+            //注意项目路径问题，自动补用项目路径
+            FileSystemResource file = new FileSystemResource(new File(path));
+            //加入邮件
+            helper.addAttachment("记录报表.xls", file);
+            
+            mailSender.send(message);
+            
+            long emailTime=System.currentTimeMillis();
+            
+            return "生成邮件耗时："+String.valueOf(xlsTime-begainTime)+"ms,发送邮件耗时："+String.valueOf(emailTime-xlsTime)+"ms";
+            
+		} catch (Exception e) {
+			// TODO: handle exception
+			throw e;
+		}
+		
 	}
 
 }

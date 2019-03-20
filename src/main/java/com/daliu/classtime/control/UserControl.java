@@ -1,13 +1,12 @@
 package com.daliu.classtime.control;
 
-import com.daliu.classtime.domain.Group;
+import com.daliu.classtime.domain.ModelDoMain;
 import com.daliu.classtime.domain.TimeDoMain;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.daliu.classtime.domain.UserDoMain;
 import com.daliu.classtime.service.TimeServiceimp;
 import com.daliu.classtime.service.UserServiceImp;
-import com.daliu.classtime.test.internetTest;
 import com.daliu.classtime.utils.*;
 import com.google.gson.Gson;
 
@@ -15,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import javassist.expr.NewArray;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,16 +43,11 @@ public class UserControl {
 	private UserServiceImp userServiceImp;
 	
 	@Autowired
-	private StringRedisTemplate stringRedisTemplate;
-	
-	@Autowired
-	private RedisTemplate<String, Object> redis;
-	
-	@Autowired
 	private UserDoMain userDoMain;
 	
 	@Autowired
 	private TimeServiceimp timeServiceimp;
+	
 	
 	 /**
      * 小程序端 获取根据小程序端发过来的code获取用户信息
@@ -70,7 +61,11 @@ public class UserControl {
 	@Value("${com.classtime.appsecret}")
 	String appsecret;
 	
-	
+	@RequestMapping(value="/",method=RequestMethod.GET)
+	@ApiOperation("查询我的记录")
+	public String test(){
+		return "wellcome to use classtime!";
+	}
 	
 	@RequestMapping(value="/myRecord",method=RequestMethod.GET)
 	@ApiOperation("查询我的记录")
@@ -116,7 +111,6 @@ public class UserControl {
 			//redis.opsForValue().set("ran",group);
 			//System.out.println(redis.opsForValue().get("ragn"));
 			//group=(Group)redis.opsForValue().get("ran");
-			//System.out.println(group.getId());
 			
 			
 			String url = String.format("https://api.weixin.qq.com/sns/jscode2session?"
@@ -126,6 +120,8 @@ public class UserControl {
 
 	        Gson gson = new Gson();
 	        map = gson.fromJson(response, map.getClass());
+	        //System.out.println(map);
+	        //现在暂且不能获取union_id
 	        
 	        //记录访问腾讯服务器耗时
 	        time=System.currentTimeMillis()-startTime;
@@ -200,7 +196,7 @@ public class UserControl {
 			
 			map.put("status","yes");
 			
-			long endTime=System.currentTimeMillis();
+			//long endTime=System.currentTimeMillis();
 			//logger.info(openid+"---"+studentId+"---"+schoolName+"---"+(endTime-startTime)+"ms");
 			return map;
 		}catch(Exception e){
@@ -219,15 +215,19 @@ public class UserControl {
 	@ApiOperation("用户进入index界面并加载完成后发送自己的的昵称")
 	@ApiImplicitParams({
 		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true ),
-		@ApiImplicitParam(paramType="query",name="nickName",value="用户的昵称",required=true )
+		@ApiImplicitParam(paramType="query",name="nickName",value="用户的昵称",required=true ),
+		@ApiImplicitParam(paramType="query",name="modelDoMain",value="接受用户的设备信息",required=true )
 	})
 	public void addNickName(@RequestParam String openId,
-			@RequestParam String nickName){
+			@RequestParam String nickName,
+			ModelDoMain modelDoMain){
 		try {
+			//System.out.println(modelDoMain);
 			//保存昵称
 			//System.out.println(openId+nickName);
 			userDoMain=userServiceImp.findByOpenId(openId);
 			userServiceImp.updateName(userDoMain, nickName);
+			userServiceImp.saveAndFlush(modelDoMain);
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
 			logger.error(openId+"---"+nickName+"---"+msg.getStackTrace(e));

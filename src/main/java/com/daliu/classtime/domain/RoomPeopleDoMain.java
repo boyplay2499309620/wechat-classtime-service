@@ -5,7 +5,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.Transient;
@@ -36,6 +35,8 @@ public class RoomPeopleDoMain {
 	private Integer times;
 	
 	private String name;
+	
+	private String schoolId;
 	
 	//不在数据库的字段，用于向前端传送是否在线的标志
 	//@NotNull(message = "状态不能为空",groups = Group.class)
@@ -79,7 +80,7 @@ public class RoomPeopleDoMain {
 	@Override
 	public String toString() {
 		return "RoomPeopleDoMain [id=" + id + ", openId=" + openId + ", roomId=" + roomId + ", begainTime=" + begainTime
-				+ ", times=" + times + ", name=" + name + ", state=" + state + "]";
+				+ ", times=" + times + ", name=" + name + ", schoolId=" + schoolId + ", state=" + state + "]";
 	}
 
 	public Integer getId() {
@@ -104,6 +105,14 @@ public class RoomPeopleDoMain {
 
 	public void setState(Integer state) {
 		this.state = state;
+	}
+
+	public String getSchoolId() {
+		return schoolId;
+	}
+
+	public void setSchoolId(String schoolId) {
+		this.schoolId = schoolId;
 	}
 	
 	

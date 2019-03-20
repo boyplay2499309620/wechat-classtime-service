@@ -25,5 +25,7 @@ public interface InRoomService {
 	public List<RoomPeopleDoMain> findAllRoomId(Integer openId);
 	
 	public RoomDoMain findByRoomId(Integer roomId);
+	
+	public String SendEmail(String openId,Integer roomId,String emailAddress) throws Exception;
 
 }

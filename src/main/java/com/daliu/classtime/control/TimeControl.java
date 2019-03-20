@@ -1,11 +1,8 @@
 package com.daliu.classtime.control;
 
-
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.daliu.classtime.domain.RankDoMain;
 import com.daliu.classtime.domain.TimeDoMain;
 import com.daliu.classtime.service.TimeServiceimp;
+import com.daliu.classtime.service.Ranking;
 import com.daliu.classtime.utils.ErrorMsg;
 
 import io.swagger.annotations.Api;
@@ -33,6 +31,9 @@ public class TimeControl {
 	
 	@Autowired
 	private TimeServiceimp timeService;
+	
+	@Autowired 
+	private Ranking rank;
 	
 	private static Logger logger = LogManager.getLogger("control.time");
 	private static Logger loggerRedis = LogManager.getLogger("redis");
@@ -71,7 +72,7 @@ public class TimeControl {
 	    	timeService.saveAll(timeDoMain);
 	    	
 	    	//刷新排行榜
-	    	timeService.refreshRank(timeDoMain);
+	    	rank.refreshRank(timeDoMain);
 	    	
 	    	//System.out.println(timeService.queryRank());
 	    	
@@ -140,9 +141,9 @@ public class TimeControl {
 	
 	//查询排行榜
 	@RequestMapping("/queryRank")
-	public ArrayList< RankDoMain > queryRank(){
+	public List<ArrayList< RankDoMain >> queryRank(){
 		try {
-			return timeService.queryRank();
+			return rank.queryRank();
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();

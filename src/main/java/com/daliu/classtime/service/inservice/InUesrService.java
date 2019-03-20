@@ -1,5 +1,6 @@
 package com.daliu.classtime.service.inservice;
 
+import com.daliu.classtime.domain.ModelDoMain;
 import com.daliu.classtime.domain.UserDoMain;
 
 import java.util.List;
@@ -17,5 +18,7 @@ public interface InUesrService {
 	public void updateName(UserDoMain userDoMain,String name);
 	
 	public void updateSchoolName(UserDoMain userDoMain,String schoolName);
+
+	public void saveAndFlush(ModelDoMain modelDoMain);
 
 }

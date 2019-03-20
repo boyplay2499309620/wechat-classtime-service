@@ -9,12 +9,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 
-@Component
+@Component("user")
 @Entity
 @Scope("prototype")
 @Table(name="user")
-public class UserDoMain {
-   
+public class UserDoMain {  
 	@Id
 	//@GeneratedValue(strategy = "uuid")
 	private String openId;
@@ -28,6 +27,10 @@ public class UserDoMain {
 	private String unionId;
 	
 	private String schoolName;
+	
+	public UserDoMain(){
+		//System.out.println("userDoMain create!");
+	}
 
 	public String getOpenId() {
 		return openId;

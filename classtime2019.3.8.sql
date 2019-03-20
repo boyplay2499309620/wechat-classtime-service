@@ -107,3 +107,6 @@ CREATE TABLE `user` (
   `school_name` char(10) DEFAULT NULL COMMENT '学校的姓名，可不绑定',
   PRIMARY KEY (`open_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户信息';
+
+
+

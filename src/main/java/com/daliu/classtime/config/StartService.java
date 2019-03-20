@@ -1,21 +1,22 @@
 package com.daliu.classtime.config;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.daliu.classtime.dao.RankDao;
-import com.daliu.classtime.dao.RoomDao;
 import com.daliu.classtime.dao.UserDao;
 import com.daliu.classtime.domain.RankDoMain;
 import com.daliu.classtime.domain.UserDoMain;
-import com.daliu.classtime.test.internetTest;
 
 /**
  * 继承Application接口后项目启动时会按照执行顺序执行run方法
@@ -24,9 +25,6 @@ import com.daliu.classtime.test.internetTest;
 @Component
 @Order(value = 1)
 public class StartService implements ApplicationRunner {
-	
-	@Autowired
-	private  RankDoMain rankDoMain;
 	
 	@Autowired
 	private  RankDao rankDao;
@@ -40,11 +38,28 @@ public class StartService implements ApplicationRunner {
 	@Autowired
 	private  RedisTemplate<String, Object> redisTemplate;
 	
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${spring.mail.username}")
+    private String Sender; //读取配置文件中的参数
+	
     @Override
     public void run(ApplicationArguments args) throws Exception {
+    	//加载排行榜
     	loadRedis();
+    	
+        
+    	
     }
     
+    /**
+     * 
+     * @Description:(系统启动时加载redis的历史排行榜，同时清空日榜和周榜)
+     * @param:   
+     * @return:void  
+     * @date:2019年3月18日
+     */
     public void loadRedis(){
     	System.out.println("******   开始加载redis          ****** ");
         for (int i = 0; i < 10; i++) {
@@ -64,8 +79,18 @@ public class StartService implements ApplicationRunner {
         	else rank.setSchoolId("");
         	
         	redisTemplate.opsForValue().set("ran"+i,rank);
+        	
+        	redisTemplate.delete("day"+i);
+        	redisTemplate.delete("week"+i);
+        	
         	i++;
         }
+        
+        Set<String> keys=stringRedisTemplate.keys("days"+"*");
+        stringRedisTemplate.delete(keys);
+        keys=stringRedisTemplate.keys("week"+"*");
+        stringRedisTemplate.delete(keys);
+        
         System.out.println("******   redis加载排行榜数据完成！       ****** ");
     }
 

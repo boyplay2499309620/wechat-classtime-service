@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.daliu.classtime.domain.ModelDoMain;
 import com.daliu.classtime.domain.UserDoMain;
+import com.daliu.classtime.dao.ModelDao;
 import com.daliu.classtime.dao.UserDao;
 import com.daliu.classtime.service.inservice.InUesrService;
 
@@ -22,6 +24,9 @@ public class UserServiceImp implements InUesrService {
 	
 	@Autowired
 	private UserDoMain userDoMain2;
+	
+	@Autowired
+	private ModelDao modelDao;
 
 
 	public List<UserDoMain> queryAllUser() {
@@ -49,7 +54,7 @@ public class UserServiceImp implements InUesrService {
 			//看看数据库中是否有这个openid，没有就插入
 			if(userDoMain1==null){
 				userDoMain2.setOpenId(openId);
-				userDao.save(userDoMain2);
+				userDao.saveAndFlush(userDoMain2);
 		        return userDoMain2;
 			}else{
 				return userDoMain1;
@@ -88,6 +93,14 @@ public class UserServiceImp implements InUesrService {
 			throw e;
 		}
 	}
+	
+
+	@Transactional
+	public void saveAndFlush(ModelDoMain modelDoMain) {
+		// TODO Auto-generated method stub
+		modelDao.saveAndFlush(modelDoMain);
+	}
+
 	
 
 }
