@@ -6,11 +6,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-@Component
-@Scope("prototype")
 @Entity
 @Table(name="phone_model")
 public class ModelDoMain {
@@ -21,17 +16,17 @@ public class ModelDoMain {
 	
 	private String openId;
 	
-	private String brand;
+	private String brands;
 	
-	private String model;
+	private String models;
 	
-	private String languages;
+	private String wechatLanguages;
 	
-	private String version;
+	private String wechatVersion;
 	
-	private String system;
+	private String phoneSystem;
 	
-	private String platform;
+	private String wechatPlatform;
 	
 	private String sdkVersion;
 
@@ -51,53 +46,7 @@ public class ModelDoMain {
 		this.openId = openId;
 	}
 
-	public String getBrand() {
-		return brand;
-	}
-
-	public void setBrand(String brand) {
-		this.brand = brand;
-	}
-
-	public String getModel() {
-		return model;
-	}
-
-	public void setModel(String model) {
-		this.model = model;
-	}
-
-	public String getLanguages() {
-		return languages;
-	}
-
-	public void setLanguages(String languages) {
-		this.languages = languages;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public String getSystem() {
-		return system;
-	}
-
-	public void setSystem(String system) {
-		this.system = system;
-	}
-
-	public String getPlatform() {
-		return platform;
-	}
-
-	public void setPlatform(String platform) {
-		this.platform = platform;
-	}
+	
 
 	public String getSdkVersion() {
 		return sdkVersion;
@@ -107,11 +56,60 @@ public class ModelDoMain {
 		this.sdkVersion = sdkVersion;
 	}
 
+	public String getBrands() {
+		return brands;
+	}
+
+	public void setBrands(String brands) {
+		this.brands = brands;
+	}
+
+	public String getModels() {
+		return models;
+	}
+
+	public void setModels(String models) {
+		this.models = models;
+	}
+
+	public String getWechatLanguages() {
+		return wechatLanguages;
+	}
+
+	public void setWechatLanguages(String wechatLanguages) {
+		this.wechatLanguages = wechatLanguages;
+	}
+
+	public String getWechatVersion() {
+		return wechatVersion;
+	}
+
+	public void setWechatVersion(String wechatVersion) {
+		this.wechatVersion = wechatVersion;
+	}
+
+	public String getPhoneSystem() {
+		return phoneSystem;
+	}
+
+	public void setPhoneSystem(String phoneSystem) {
+		this.phoneSystem = phoneSystem;
+	}
+
+	public String getWechatPlatform() {
+		return wechatPlatform;
+	}
+
+	public void setWechatPlatform(String wechatPlatform) {
+		this.wechatPlatform = wechatPlatform;
+	}
+
 	@Override
 	public String toString() {
-		return "ModelDoMain [modelId=" + modelId + ", openId=" + openId + ", brand=" + brand + ", model=" + model
-				+ ", languages=" + languages + ", version=" + version + ", system=" + system + ", platform=" + platform
-				+ ", sdkVersion=" + sdkVersion + "]";
+		return "ModelDoMain [modelId=" + modelId + ", openId=" + openId + ", brands=" + brands + ", models=" + models
+				+ ", wechatLanguages=" + wechatLanguages + ", wechatVersion=" + wechatVersion + ", phoneSystem="
+				+ phoneSystem + ", wechatPlatform=" + wechatPlatform + ", sdkVersion=" + sdkVersion + "]";
 	}
+
 
 }

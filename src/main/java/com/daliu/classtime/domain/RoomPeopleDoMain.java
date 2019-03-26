@@ -6,9 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.Transient;
-import org.springframework.stereotype.Component;
 
 
 /**
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Component;
  * @author Administrator
  *
  */
-@Component
-@Scope("prototype")
 @Entity
 @Table(name="room_people")
 public class RoomPeopleDoMain { 

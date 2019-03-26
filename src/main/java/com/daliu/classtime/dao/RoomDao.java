@@ -3,6 +3,7 @@ package com.daliu.classtime.dao;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ public interface RoomDao extends JpaRepository<RoomDoMain, Integer>{
 
 	public RoomDoMain findByRoomNumberAndRoomState(int a, int i);
 	
-	public RoomDoMain findByOpenIdAndRoomState(String openId,Integer roomState);
+	List<RoomDoMain> findByOpenIdAndRoomState(String openId,Integer roomState);
 	
 	public Page<RoomDoMain> findByOpenId(String openId,Pageable pageable);
 	

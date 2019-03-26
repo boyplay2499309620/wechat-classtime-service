@@ -36,7 +36,10 @@ public class TimeControl {
 	private Ranking rank;
 	
 	private static Logger logger = LogManager.getLogger("control.time");
+	
 	private static Logger loggerRedis = LogManager.getLogger("redis");
+	
+	static String log="\r\n****************      纪录结束       **********************\r\n";
 	
 	//结束的时候提交信息
 	@RequestMapping(value="/endTime",method=RequestMethod.POST)
@@ -48,21 +51,14 @@ public class TimeControl {
     public Map<String, String> endTime(TimeDoMain timeDoMain ){
 
 		try {
-			//接下来这两个if用来避免前端由于未知错误参数丢失，后台发生关联错误
-			/*这个if已经找到原因了，前端更新了数据单没有及时赋值，导致dates字段为空
-			 if(timeDoMain.getDates()==""){
-				//这个dates字段有时不知道为什么就是为空,有时候又不会
-				System.out.println("recrive dom datas:  "+timeDoMain);
-				//得到long类型当前时间
-				long l=System.currentTimeMillis();
-				//new日期对象
-				Date date=new Date(l);
-				//转换提日期输出格式
-				SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy.MM.dd");
-				System.out.println( dateFormat.format(date));
-				timeDoMain.setDates( dateFormat.format(date));
-			}*/
-			//前台已经传过来roonId为1,不知道为什么还是拿不到，总是为null
+			//对参数的必要性检查
+			//timeDoMain的pauseMsg字段可能由于暂停次数过多而导致太长，数据库只有250字节
+			//前端控制了暂停次数，但现在后台仍旧做检查
+			if(timeDoMain.getPauseMsg().length()>250)
+				timeDoMain.setPauseMsg(new StringBuffer(timeDoMain.getPauseMsg()).substring(0,250));
+			
+			//前台已经传过来roonId为1,不知道为什么有时候拿不到，总是为null
+			//可能是前端控制逻辑出现了错误，导致用户退出房间时没有及时更新roomId
 			if(timeDoMain.getRoomId()==null || timeDoMain.getRoomId().toString()=="")
 				timeDoMain.setRoomId(1);
 			
@@ -83,8 +79,8 @@ public class TimeControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(timeDoMain.toString()+"---"+msg.getStackTrace(e));
-			System.out.println(msg.getStackTrace(e));
+			logger.error("timeDoMain:"+timeDoMain.toString()+"\r\n 错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("timeControl endTime have error");
 			return null;
 		}
     	
@@ -100,8 +96,8 @@ public class TimeControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			loggerRedis.error(openId+"---"+msg.getStackTrace(e));
-			System.out.println(msg.getStackTrace(e));
+			loggerRedis.error("openId:"+openId+"   错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("timeControl online have error");
 		}
 	}
 	
@@ -113,7 +109,8 @@ public class TimeControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			loggerRedis.error(openId+"---"+msg.getStackTrace(e));
+			loggerRedis.error("openId:"+openId+"    错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("timeControl suspend have error");
 		}
 	}
 	
@@ -132,7 +129,8 @@ public class TimeControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openId+"   错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("timeControl queryOnline have error");
 			return map;
 		}
 
@@ -147,8 +145,8 @@ public class TimeControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			loggerRedis.error(msg.getStackTrace(e));
-			System.out.println(msg.getStackTrace(e));
+			loggerRedis.error("错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("timeControl queryRank have error");
 			return null; 
 		}
 	}

@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -63,18 +65,6 @@ public class Ranking {
 	private RankDao rankDao;
 	
 	@Autowired
-	private RankDoMain rankDoMain;
-	
-	@Autowired
-	private RankDoMain rankDoMain2;
-	
-	@Autowired
-	private RankDoMain rankDoMain3;
-	
-	@Autowired
-	private UserDoMain userDoMain;
-	
-	@Autowired
 	private UserDao userDao;
 	
 	@Autowired
@@ -93,29 +83,36 @@ public class Ranking {
 	@Transactional
 	public void refreshRank(TimeDoMain timeDoMain){
 		try {
-			StringBuffer strbuff=new StringBuffer(timeDoMain.getTimes());
 			//约定字符串的形状是"00:00:00"
-			//int a=strbuff.indexOf(":");
 			//将字符串转化为以秒为单位的int型
 			//time为该次提交的时间
-			int time=Integer.parseInt(strbuff.substring(0,2).toString()) * 3600+
-					Integer.parseInt(strbuff.substring(3,5).toString()) * 60 + 
-					Integer.parseInt(strbuff.substring(6).toString());
+			
+			// 创建 Pattern 对象
+	        Pattern r = Pattern.compile("(\\d*):(\\d*):(\\d*)");
+	   
+	        // 现在创建 matcher 对象
+	        Matcher m = r.matcher(timeDoMain.getTimes());
+	        m.find();
+	        
+			int time=Integer.parseInt(m.group(1)) * 3600+
+					Integer.parseInt(m.group(2)) * 60 + 
+					Integer.parseInt(m.group(3));
 			
 			//该用户在系统上的总时间，用来刷新redis的排行榜,time则为该次提交的时间
 			int times=0;
 			
 			//更新数据库记录
-			rankDoMain=rankDao.findByOpenId(timeDoMain.getOpenId());
+			RankDoMain rankDoMain=rankDao.findByOpenId(timeDoMain.getOpenId());
 			if(rankDoMain!=null){
 				//该用户已经在本系统上提交过记录了
 				times=time+rankDoMain.getTimes();
-
-				updateRankTimes(rankDoMain, time);
+				rankDoMain.setTimes(times);
+				rankDao.saveAndFlush(rankDoMain);
 			}else{
 				//该用户这是第一次提交时间记录
 				//构造记录并保存
 				//rankDoMain2.setId(null);
+				RankDoMain rankDoMain2=new RankDoMain();
 				rankDoMain2.setOpenId(timeDoMain.getOpenId());
 				rankDoMain2.setTimes(time);
 				rankDao.saveAndFlush(rankDoMain2);
@@ -148,65 +145,12 @@ public class Ranking {
 	public void refreshRedis(String openId, int times) {
 		
 		try {
-			rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("ran9");
+			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("ran9");
 			if(rankDoMain!=null && rankDoMain.getTimes() >= times){
 				//该用户没进前十，不干嘛！
 			}else{
 				//历史排行榜里没有十个人或者该用户进了前十
 				insertRank("ran", openId, times);
-				/*
-				//得到该用户的排行榜基本信息保存在rankDoMain3中
-				userDoMain=userDao.findByOpenId(timeDoMain.getOpenId());
-				
-				if(userDoMain.getSchoolName()!=null)
-					rankDoMain3.setName(userDoMain.getSchoolName());
-				else 
-				rankDoMain3.setName(userDoMain.getName());
-				
-				if(userDoMain.getSchoolId()!=null)
-				rankDoMain3.setSchoolId(userDoMain.getSchoolId());
-				else
-				rankDoMain3.setSchoolId("");
-				
-				rankDoMain3.setOpenId(timeDoMain.getOpenId());
-				rankDoMain3.setTimes(times);
-				
-				int i=0;
-				while(i<10){
-					//从记录最大的开始循环遍历，找到合适的位置，将该用户插入排行榜
-					rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("ran"+i);
-					if(rankDoMain==null){
-						//第i名没人,直接插入，退出循环
-						redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-						i=100;
-					}else if(times>rankDoMain.getTimes()){
-						//该用户比第i名大，将第i名置换成该用户，从原第i名开始，依次后退一名。
-						//redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-						while(i<10){
-							rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("ran"+i);
-							if(rankDoMain==null){
-								//后面都没人了
-								redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-								i=100;
-							}else if(rankDoMain.getOpenId().equals(openId)){
-								//该用户以前就已经在排行榜中，只是现在名词靠前了
-								redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-								i=100;
-							}else{
-								redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-								rankDoMain3=rankDoMain;
-								i++;
-							}
-							
-						}
-						
-						//退出循环
-						i=100;
-					}
-					
-					//比较下一个
-					i++;
-				}*/
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -246,7 +190,7 @@ public class Ranking {
 				stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			}
 			
-			rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("week9");
+			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("week9");
 			if(rankDoMain!=null && rankDoMain.getTimes() >= times){
 				//该用户没进前十，不干嘛！
 			}else{
@@ -282,7 +226,7 @@ public class Ranking {
 				stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			}
 			
-			rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("day9");
+			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("day9");
 			if(rankDoMain!=null && rankDoMain.getTimes() >= times){
 				//该用户没进前十，不干嘛！
 			}else{
@@ -309,7 +253,8 @@ public class Ranking {
 	public void insertRank(String rank,String openId,int times){
 		try {
 			//得到该用户的排行榜基本信息保存在rankDoMain3中 
-			userDoMain=userDao.findByOpenId(openId);
+			UserDoMain userDoMain=userDao.findByOpenId(openId);
+			RankDoMain rankDoMain3=new RankDoMain();
 			
 			if(userDoMain.getSchoolName()!=null)
 				rankDoMain3.setName(userDoMain.getSchoolName());
@@ -327,7 +272,7 @@ public class Ranking {
 			int i=0;
 			while(i<10){
 				//从记录最大的开始循环遍历，找到合适的位置，将该用户插入排行榜
-				rankDoMain=(RankDoMain)redisTemplate.opsForValue().get(rank+i);
+				RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get(rank+i);
 				if(rankDoMain==null){
 					//第i名没人,直接插入，退出循环
 					redisTemplate.opsForValue().set(rank+i,rankDoMain3);
@@ -375,6 +320,8 @@ public class Ranking {
 			ArrayList<RankDoMain> arrayListWeek=new ArrayList<RankDoMain>();
 			ArrayList<RankDoMain> arrayListDay=new ArrayList<RankDoMain>();
 			
+			RankDoMain rankDoMain=new RankDoMain();
+			
 			//返回日榜
 			for (int i = 0; i < 10; i++) {
 				rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("day"+i);
@@ -407,12 +354,6 @@ public class Ranking {
 			// TODO: handle exception
 			throw e;
 		}
-	}
-	
-	@Transactional
-	//在数据库记录表rank中更新记录
-	public void updateRankTimes(RankDoMain rank,int time){
-		rank.setTimes(rank.getTimes()+time);
 	}
 		
 		

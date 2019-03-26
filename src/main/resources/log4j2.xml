@@ -61,8 +61,8 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             </Policies>
             <Filters>
                 <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="100"/>
@@ -79,8 +79,8 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             </Policies>
             <Filters>
                 <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="100"/>
@@ -97,8 +97,8 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             </Policies>
             <Filters>
                 <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="100"/>
@@ -115,8 +115,8 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             </Policies>
             <Filters>
                 <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="100"/>
@@ -133,67 +133,11 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             </Policies>
             <Filters>
                 <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
-            <DefaultRolloverStrategy max="10"/>
-        </RollingRandomAccessFile>
-
-        <!-- 打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-        <!-- 存储所有info信息  -->
-        <RollingRandomAccessFile name="infoLog" fileName="${logDir}/${App}-info.log" immediateFlush="true"
-                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-info-%d{yyyy-MM-dd HH-mm-ss}-%i.log.gz"
-                                 append="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="10" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="${splitSize}"/>
-            </Policies>
-            <Filters>
-                <!-- 存储所有info信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
                 <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="10"/>
-        </RollingRandomAccessFile>
-        
-        
-        <!-- 打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-        <!-- 存储所有warn信息  -->
-        <RollingRandomAccessFile name="warnLog" fileName="${logDir}/${App}-warn.log" immediateFlush="true"
-                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-warn-%d{MM-dd-yyyy}-%i.log.gz"
-                                 append="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="${splitSize}"/>
-            </Policies>
-            <Filters>
-                <!-- 存储所有warn信息  -->
-                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
-            <DefaultRolloverStrategy max="50"/>
-        </RollingRandomAccessFile>
-
-        <!-- 存储所有error信息 -->
-        <RollingRandomAccessFile name="errorLog" fileName="${logDir}/${App}-error.log" immediateFlush="true"
-                                 filePattern="${logDir}/$${date:yyyy-MM}/${App}-error-%d{MM-dd-yyyy}-%i.log.gz"
-                                 append="false">
-            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="${splitSize}"/>
-            </Policies>
-            <Filters>
-                <!-- 只记录error级别信息 -->
-                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
-            <DefaultRolloverStrategy max="50"/>
         </RollingRandomAccessFile>
         
         
@@ -219,6 +163,10 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
         
         <logger name="control.time" level="info" additivity="false">
         	<appender-ref ref="timeDebugLog"/>
+        </logger>
+        
+        <logger name="system" level="info" additivity="false">
+        	<appender-ref ref="debugLog"/>
         </logger>
 
     </Loggers>

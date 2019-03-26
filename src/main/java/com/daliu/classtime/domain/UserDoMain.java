@@ -5,13 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-
-@Component("user")
 @Entity
-@Scope("prototype")
 @Table(name="user")
 public class UserDoMain {  
 	@Id

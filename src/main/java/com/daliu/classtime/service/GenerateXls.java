@@ -27,9 +27,6 @@ public class GenerateXls {
 	private RoomPeopleDao roomPeopleDao;
 	
 	@Autowired
-	private RoomDoMain roomDoMain;
-	
-	@Autowired
 	private RoomDao roomDao;
 	
 	public String CreateXls(Integer roomId) throws Exception{
@@ -39,7 +36,7 @@ public class GenerateXls {
 			
 			List<RoomPeopleDoMain> list=roomPeopleDao.findByRoomId(roomId);
 			//System.out.println(list);
-			roomDoMain=roomDao.findByRoomId(roomId);
+			RoomDoMain roomDoMain=roomDao.findByRoomId(roomId);
 			
 			File file=new File(path);
 			if(file.exists()) file.delete();

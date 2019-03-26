@@ -42,34 +42,16 @@ public class RoomServiceimp implements InRoomService{
 	int roomTime;
 	
 	@Autowired
-	private Random random;
-	
-	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	
 	@Autowired
-	private RoomDoMain room;
-	
-	@Autowired
-	private RoomDoMain room1;
-	
-	@Autowired
 	private RoomDao roomDao;
-	
-	@Autowired
-	private UserDoMain user;
 	
 	@Autowired
 	private UserServiceImp users;
 	
 	@Autowired
 	private RoomPeopleDao roomPeopleDao;
-	
-	@Autowired
-	private RoomPeopleDoMain roomPeopleDoMain;
-	
-	@Autowired 
-	private RoomPeopleDoMain roomPeopleDoMain1;
 	
 	@Autowired
 	private GenerateXls generateXls;
@@ -134,19 +116,14 @@ public class RoomServiceimp implements InRoomService{
 		
 	}
 	
-	public void use(){
-		System.out.println("room    "+room);
-		System.out.println("room1    "+room1);
-	}
-	
 	//创建一个房间,系统生成房间号
 	@Transactional
 	public RoomDoMain createNum(String openId,String remark){
 		try {
-			System.out.println("createRoom service : "+Thread.currentThread().getName());
 			//找到一个可用的房间号
 			Boolean flag=true;
 			int a=0;
+			Random random=new Random();
 			while(flag){
 				a=random.nextInt(999)%100+100;
 				if(a<1 || a>999) continue;
@@ -157,17 +134,18 @@ public class RoomServiceimp implements InRoomService{
 				}
 			}
 			
-			//现将该用户上一次创建的还没有结束房间标志   为结束
-			System.out.println("room1111begain"+room1);
-			room1=roomDao.findByOpenIdAndRoomState(openId,1);
-			System.out.println("room1111end"+room1);
-			if(room1!=null){
-				updateRoomState(room1);
+			//现将该用户上一次创建的还没有结束房间标志  为结束
+			//防止因为错误导致的数据库中有多个上次创建的还没有结束的房间引发错误
+			List<RoomDoMain> list=roomDao.findByOpenIdAndRoomState(openId,1);
+			for (RoomDoMain room1 :list) {
+				room1.setRoomState(0);
+				roomDao.saveAndFlush(room1);
+				stringRedisTemplate.delete("room"+room1.getRoomNumber());
 			}
-			System.out.println("service111"+room);
 			
 			//构造一条新纪录
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+			RoomDoMain room=new RoomDoMain();
 			room.setRoomNumber(a);
 			room.setRoomState(1);
 			room.setRemark(remark);
@@ -175,8 +153,6 @@ public class RoomServiceimp implements InRoomService{
 			room.setRoomPeoples(0);
 			//room.setRoomId(null);
 			room.setCreateTime(df.format(new Date()));
-			System.out.println("service222"+room);
-			use();
 			//return(roomDao.save(room));
 			//不立即刷新则加入房间时会报错，因为查不到房间
 			roomDao.saveAndFlush(room);
@@ -195,6 +171,7 @@ public class RoomServiceimp implements InRoomService{
 		}
 		
 		
+		
 	}
 	
 	//创建一个房间,人为指定房间号
@@ -206,13 +183,16 @@ public class RoomServiceimp implements InRoomService{
 				return null;
 			}else{
 				//查询该用户是否有上一间房还未到期，有的话让其到期
-				room1=roomDao.findByOpenIdAndRoomState(openId,1);
-				if(room1!=null){
-					updateRoomState(room1);
+				List<RoomDoMain> list=roomDao.findByOpenIdAndRoomState(openId,1);
+				for (RoomDoMain room1 :list) {
+					room1.setRoomState(0);
+					roomDao.saveAndFlush(room1);
+					stringRedisTemplate.delete("room"+room1.getRoomNumber());
 				}
 				
 				//构造一条记录
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+				RoomDoMain room=new RoomDoMain();
 				room.setOpenId(openId);
 				room.setRemark(remark);
 				//room.setRoomId(null);
@@ -235,23 +215,7 @@ public class RoomServiceimp implements InRoomService{
 			throw e;
 		}
 		
-	}
-	
-	/**
-	 * 使用了@Transactional的方法，对同一个类里面的方法调用， @Transactional无效
-	 *但这里仍然添加了@Transactional，以防外部类的调用
-	 */
-	@Transactional
-	public void updateRoomState(RoomDoMain room){
-		//将RoomState置位0
-		//System.out.println(room.getRoomId()+":"+room.getRoomState());
-		try {
-			room.setRoomState(0);
-		} catch (Exception e) {
-			throw e;
-		}
-	}
-	
+	}	
 	
 	
 	//进入房间
@@ -260,22 +224,24 @@ public class RoomServiceimp implements InRoomService{
 		try {
 			//判断房间是否存在，不存在返回null，否则返回room信息
 			
-			room=roomDao.findByRoomNumberAndRoomState(roomNumber, 1);
+			RoomDoMain room=roomDao.findByRoomNumberAndRoomState(roomNumber, 1);
 			
 			if(room!=null){ 
 				//房间存在,向room_people表插入一条记录
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 
-				roomPeopleDoMain=roomPeopleDao.findByOpenIdAndRoomId(openId,room.getRoomId());
+				RoomPeopleDoMain roomPeopleDoMain=roomPeopleDao.findByOpenIdAndRoomId(
+						openId,room.getRoomId());
 				
 				if(roomPeopleDoMain==null){
 					//表明以前没进来过
 					//插入一条新纪录
 					//System.out.println(openId+"---"+roomNumber);
 					//查询姓名
-					user=users.findByOpenId(openId);
+					UserDoMain user=users.findByOpenId(openId);
 					
 					//roomPeopleDoMain1.setId(null);
+					RoomPeopleDoMain roomPeopleDoMain1=new RoomPeopleDoMain();
 					roomPeopleDoMain1.setOpenId(openId);
 					roomPeopleDoMain1.setRoomId(room.getRoomId());
 					roomPeopleDoMain1.setBegainTime(df.format(new Date()));
@@ -291,7 +257,12 @@ public class RoomServiceimp implements InRoomService{
 					//System.out.println("已经入房间"+openId+"--"+room.getRoomId());
 					
 					//房间人数加一
-					updataAddRoom(room);
+					if(room.getRoomPeoples()==null){
+						room.setRoomPeoples(1);
+					}else{
+						room.setRoomPeoples(room.getRoomPeoples()+1);
+					}
+					roomDao.saveAndFlush(room);
 					
 					return room;
 				}else{
@@ -309,36 +280,6 @@ public class RoomServiceimp implements InRoomService{
 			throw e;
 		}
 		
-	}
-	
-	//房间人数加一
-	@Transactional
-	public void updataAddRoom(RoomDoMain room){
-		//System.out.println(room.getRoomPeoples());
-		//System.out.println(room.getRoomPeoples());
-		//有时这些信息不能更新数据库的表，后来我在调用该方法上也加了@Transactional又暂时能更新了
-		try {
-			Integer i=room.getRoomPeoples();
-			i++;
-			room.setRoomPeoples(i);
-		} catch (Exception e) {
-			throw e;
-		}
-	}
-	
-	//更新room_people表的time字段
-	@Transactional
-	synchronized public void updataTime(RoomPeopleDoMain roomPeopleDoMain,int time){
-		
-		try {
-			if(roomPeopleDoMain.getTimes()==null){
-				roomPeopleDoMain.setTimes(time);
-			}else{
-				roomPeopleDoMain.setTimes(time+roomPeopleDoMain.getTimes());
-			}
-		} catch (Exception e) {
-			throw e;
-		}
 	}
 	
 	//发送邮件

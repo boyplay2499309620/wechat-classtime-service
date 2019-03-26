@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -18,8 +19,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 // Spring Boot 应用的标识
 @SpringBootApplication
 @EnableCaching
-@EnableSwagger2             //启动swagger注解
-public class Application {
+@EnableSwagger2  
+@EnableScheduling
+//启动swagger注解
+public class Application{
 	//extends SpringBootServletInitializer
 
     public static void main(String[] args) {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.daliu.classtime.domain.RoomDoMain;
 import com.daliu.classtime.service.RoomServiceimp;
 import com.daliu.classtime.utils.ErrorMsg;
+import com.daliu.classtime.utils.StringUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -31,8 +32,7 @@ public class RoomControl {
 	
 	private static Logger logger = LogManager.getLogger("control.room");
 	
-	@Autowired
-	private RoomDoMain room;
+	static String log="\r\n****************      纪录结束       **********************\r\n";
 	
 	@Autowired
 	private RoomServiceimp rooms;
@@ -46,14 +46,15 @@ public class RoomControl {
 	})
 	public Map<String,Object> getRoomPeople(@RequestParam Integer roomId){
 		try {
+			
 			Map<String,Object> map=new HashMap<String, Object>();
 			map.put("list",rooms.findAllRoomId(roomId));
 			map.put("room",rooms.findByRoomId(roomId));
 			return map;
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(roomId+"---"+msg.getStackTrace(e));
-			System.out.println("roomcontrol getRoomPeople---"+roomId+"---"+msg.getStackTrace(e));
+			logger.error("roomId:"+roomId+"    错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("roomControl getRoomPeople have error");
 			return null;
 		}
 	}
@@ -74,8 +75,8 @@ public class RoomControl {
 			//return null;
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+pageNum+"---"+msg.getStackTrace(e));
-			System.out.println(openId+"---"+pageNum+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openId+"    查询的页数："+pageNum+"    错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("roomControl myRoom have error");
 			return null;
 		}
 		
@@ -96,19 +97,21 @@ public class RoomControl {
 		long startTime=System.currentTimeMillis();
 		Map<String,String> map=new HashMap<String, String>();
 		try{
-			System.out.println("createRoom control : "+Thread.currentThread().getName());
+			//对参数的必要性检查
+			if(number>9999)return null;
+			if(StringUtils.getWordCount(remark)>49) 
+				remark=StringUtils.getSubString(remark,48);
+			
 			if(number==0){
 				//用户没有指定房间号
-				System.out.println("roomcontrol111"+room);
-				room=rooms.createNum(openId,remark);
-				System.out.println("roomcontrol222"+room);
+				RoomDoMain room=rooms.createNum(openId,remark);
 				number=room.getRoomNumber();
 				map.put("status","0");
 				map.put("number",room.getRoomNumber().toString());
 				map.put("roomId",room.getRoomId().toString());
 			}else{
 				//用户指定房间号
-				room=rooms.createNumByNum(openId,remark,number);
+				RoomDoMain room=rooms.createNumByNum(openId,remark,number);
 				if(room==null){
 					//表明这个number正在使用
 					map.put("status","2");
@@ -131,10 +134,9 @@ public class RoomControl {
 		}catch (Exception e) {
 			long endTime=System.currentTimeMillis();
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+number+"---"+remark+"---"+(endTime-startTime)+
-					"ms"+"---"+map+"---"+msg.getStackTrace(e));
-			System.out.println(openId+"---"+number+"---"+remark+"---"+
-					(endTime-startTime)+"ms"+"---"+map+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openId+"    number:"+number+"     remark:"+remark+"     耗时："+
+					(endTime-startTime)+"ms \r\n map:"+map+"\r\n 错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("roomControl createRoom have error");
 			return map;
 		}
 		
@@ -153,7 +155,7 @@ public class RoomControl {
 		try {
 			Map<String, String> map=new HashMap<String, String>();
 			
-			room=rooms.getRoom(openId,roomNumber);
+			RoomDoMain room=rooms.getRoom(openId,roomNumber);
 			
 			if(room!=null){
 				//该房间存在
@@ -169,8 +171,9 @@ public class RoomControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+roomNumber+"---"+msg.getStackTrace(e));
-			System.out.println(openId+"---"+roomNumber+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openId+"    roomNumber:"+roomNumber+
+					"\r\n错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("roomControl getroom have error");
 			return null;
 		}
 		
@@ -195,8 +198,9 @@ public class RoomControl {
             //System.out.println("发送成功！"+string);
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+roomId+"---"+roomId+"---"+msg.getStackTrace(e));
-			System.out.println(openId+"---"+roomId+"---"+roomId+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openId+"    roomId:"+roomId+
+					"   错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("roomControl SendEmail have error");
 		}
 	}
 	

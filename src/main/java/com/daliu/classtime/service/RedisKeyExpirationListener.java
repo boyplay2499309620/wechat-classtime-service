@@ -26,9 +26,6 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
 	@Autowired
 	RoomServiceimp roomServiceimp;
 	
-	@Autowired 
-	RoomDoMain roomDoMain;
-	
 	@Autowired
 	RoomDao roomDao;
 	
@@ -59,10 +56,11 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
         	switch (key) {
     		case "room":
     			//房间失效，value为房间号码
-    			roomDoMain=roomDao.findByRoomNumberAndRoomState(Integer.parseInt(value),1);
+    			RoomDoMain roomDoMain=roomDao.findByRoomNumberAndRoomState(Integer.parseInt(value),1);
     			//可能用户又重新创建了房间，该房间已经失效
     			if(roomDoMain!=null){
-    				roomServiceimp.updateRoomState(roomDoMain);	
+    				roomDoMain.setRoomState(0);
+    				roomDao.saveAndFlush(roomDoMain);
     			}
     			break;
     		case "time":

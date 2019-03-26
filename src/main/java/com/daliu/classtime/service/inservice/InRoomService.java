@@ -16,10 +16,6 @@ public interface InRoomService {
 	
 	public RoomDoMain getRoom(String openId,Integer roomNumber);
 	
-	public void updataAddRoom(RoomDoMain room);
-	
-	public void updataTime(RoomPeopleDoMain roomPeopleDoMain,int time);
-	
 	public Page<RoomDoMain> myRoom(String openId,Pageable pageable);
 	
 	public List<RoomPeopleDoMain> findAllRoomId(Integer openId);

@@ -39,11 +39,10 @@ public class UserControl {
 	
 	private static Logger logger = LogManager.getLogger("control.user");
 	
-	@Autowired
-	private UserServiceImp userServiceImp;
+	static String log="\r\n****************      纪录结束       **********************\r\n";
 	
 	@Autowired
-	private UserDoMain userDoMain;
+	private UserServiceImp userServiceImp;
 	
 	@Autowired
 	private TimeServiceimp timeServiceimp;
@@ -62,7 +61,7 @@ public class UserControl {
 	String appsecret;
 	
 	@RequestMapping(value="/",method=RequestMethod.GET)
-	@ApiOperation("查询我的记录")
+	@ApiOperation("测试springboot能否访问")
 	public String test(){
 		return "wellcome to use classtime!";
 	}
@@ -77,9 +76,7 @@ public class UserControl {
 			@RequestParam int pageNum){
 		try {
 			//System.out.println(pageNum);
-			if(pageNum<0){
-				pageNum=0;
-			}
+			
 			Sort sort = new Sort(Sort.Direction.DESC, "id");
 			Pageable pageable = PageRequest.of(pageNum,10, sort);
 			//PageRequest.of(当前查询的是第几页，每页展示多少条数据，sort参数)
@@ -88,8 +85,9 @@ public class UserControl {
 			return pages; 
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			System.out.println("myRecord---"+openId+"---"+pageNum+"---"+msg.getStackTrace(e));
-			logger.error(openId+"---"+pageNum+"---"+msg.getStackTrace(e));
+			System.out.println("UserControl myRecord have error\n");
+			logger.error("openId:"+openId+"       查询页数："+pageNum+
+					"     错误原因\r\n"+msg.getStackTrace(e)+log);
 			return null;
 		}
 	}
@@ -106,13 +104,6 @@ public class UserControl {
 		Map<String, String> map = new HashMap<String ,String>();
 		try{
 			
-			//Group group=new Group();
-			//group.setId(155);
-			//redis.opsForValue().set("ran",group);
-			//System.out.println(redis.opsForValue().get("ragn"));
-			//group=(Group)redis.opsForValue().get("ran");
-			
-			
 			String url = String.format("https://api.weixin.qq.com/sns/jscode2session?"
 	        		+ "appid=%s&secret=%s&js_code=%s&grant_type=authorization_code\n", 
 	        		appid, appsecret, code);
@@ -127,10 +118,11 @@ public class UserControl {
 	        time=System.currentTimeMillis()-startTime;
 	        
 	        //看看数据库中是否有该openid，若有，不干什么，没有，新建一个用户，插入此openid
-	        userDoMain=userServiceImp.findByOpenId(map.get("openid"));
+	        UserDoMain userDoMain=userServiceImp.findByOpenId(map.get("openid"));
 	        
 	        //保存这次的sessionkey
-	        userServiceImp.updateSessionKey(userDoMain, map.get("session_key"));
+	        userDoMain.setSessionKey(map.get("session_key"));
+	        userServiceImp.saveUser(userDoMain);
 	        
 	        //返回数据库中已有的昵称给前端
 	        if(userDoMain.getName()==null) map.put("nickName","");
@@ -157,25 +149,26 @@ public class UserControl {
 	        
 	        long endTime=System.currentTimeMillis(); //获取结束时间
 	        
-	        logger.info(map.get("openid")+"---"+time+"---"+(endTime-startTime)+"ms");
+	        logger.info("openid:"+map.get("openid")+
+	        		"    服务器返回时间:"+time+
+	        		"    整个方法的耗时："+(endTime-startTime)+"ms"+log);
 	        //执行logger.info的时间大概在20ms左右，整个方法耗时大概250ms，相比较而言可以接受
-	        //endTime=System.currentTimeMillis();
-	        //System.out.println((endTime-startTime)+"ms");
 	    	return map;
 		}catch(Exception e){
 			ErrorMsg msg=new ErrorMsg();
 			long endTime=System.currentTimeMillis(); //获取结束时间
-			logger.error(code+"---"+map+"---"+(endTime-startTime)+"ms"+"---"+
-					msg.getStackTrace(e));
-			System.out.println(code+"---"+map+"---"+time+"---"+(endTime-startTime)+"ms"+
-					"---"+msg.getStackTrace(e));
+			
+			logger.error("code:"+code+"    服务器返回数据:"+map+
+					"\r\n耗时"+(endTime-startTime)+"ms"+
+					"      错误信息如下：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("UserControl getopenid have error\n");
 			return map;
 		}
         
 
     }
 	
-	@RequestMapping(value="schoolId",method=RequestMethod.POST)
+	@RequestMapping(value="/schoolId",method=RequestMethod.POST)
 	@ApiOperation("用户绑定学号")
 	@ApiImplicitParams({
 		@ApiImplicitParam(paramType="query",name="openid",value="openid",required=true ),
@@ -190,9 +183,17 @@ public class UserControl {
 		Map<String,String> map=new HashMap<String, String>();
 		
 		try{
-			userDoMain=userServiceImp.findByOpenId(openid);
-			userServiceImp.updateSchoolId(userDoMain,studentId);
-			userServiceImp.updateSchoolName(userDoMain, schoolName);
+			//对参数的必要性检查
+			if(openid==null) return null;
+			if( StringUtils.getWordCount(schoolName)>30) 
+				schoolName=StringUtils.getSubString(schoolName,29);
+			if(StringUtils.getWordCount(studentId)>14) 
+				studentId=StringUtils.getSubString(studentId,29);
+			
+			UserDoMain userDoMain=userServiceImp.findByOpenId(openid);
+			userDoMain.setSchoolId(studentId);
+			userDoMain.setSchoolName(schoolName);
+			userServiceImp.saveUser(userDoMain);
 			
 			map.put("status","yes");
 			
@@ -202,38 +203,68 @@ public class UserControl {
 		}catch(Exception e){
 			ErrorMsg msg=new ErrorMsg();
 			long endTime=System.currentTimeMillis();
-			logger.error(openid+"---"+studentId+"---"+schoolName+"---"+
-			(endTime-startTime)+"ms"+"---"+msg.getStackTrace(e));
-			System.out.println(openid+"---"+studentId+"---"+schoolName+"---"+
-			(endTime-startTime)+"ms"+"---"+msg.getStackTrace(e));
+			logger.error("openId:"+openid+"      studentId:"+studentId+"     schoolName"+schoolName+
+					"耗时："+(endTime-startTime)+"ms"+
+					"\r\n 错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("userControl schoolId hava error\n");
 			return map;
 		}
 		
 	}
 	
-	@RequestMapping(value="addNickName",method=RequestMethod.POST)
-	@ApiOperation("用户进入index界面并加载完成后发送自己的的昵称")
+	@RequestMapping(value="/addNickName",method=RequestMethod.POST)
+	@ApiOperation("用户进入index界面并加载完成后发送自己的昵称")
 	@ApiImplicitParams({
 		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true ),
-		@ApiImplicitParam(paramType="query",name="nickName",value="用户的昵称",required=true ),
-		@ApiImplicitParam(paramType="query",name="modelDoMain",value="接受用户的设备信息",required=true )
+		@ApiImplicitParam(paramType="query",name="nickName",value="用户的昵称",required=true )
 	})
 	public void addNickName(@RequestParam String openId,
-			@RequestParam String nickName,
-			ModelDoMain modelDoMain){
+			@RequestParam String nickName){
+		//把addNickName和addModel分开发送，避免一个函数执行失败造成回滚，两个信息都无法保存
 		try {
-			//System.out.println(modelDoMain);
+			//http://localhost:8080/classtime/user/addNickName?nickName=非官方个非官方 & openId=orxZW4-KPDilobrjiLfn2Bdc5mok & brand=LeEco & model=LEX720 & languages=zh_CN & version=6.7.3 & system=Android 6.0.1 & platform=android & sdkVersion=2.4.4
+			//对参数的必要性检查
+			if(openId==null) return;
+			if(StringUtils.getWordCount(nickName)>28) 
+				nickName=StringUtils.getSubString(nickName,28);
+			
 			//保存昵称
 			//System.out.println(openId+nickName);
-			userDoMain=userServiceImp.findByOpenId(openId);
-			userServiceImp.updateName(userDoMain, nickName);
-			userServiceImp.saveAndFlush(modelDoMain);
+			UserDoMain userDoMain=userServiceImp.findByOpenId(openId);
+			
+			//特殊情况，前端优势后就是不能传送微信昵称过来
+			if(nickName==null || nickName.equals(""))
+				nickName="unKnow";
+			userDoMain.setName(nickName);
+			userServiceImp.saveUser(userDoMain);
+		
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			logger.error(openId+"---"+nickName+"---"+msg.getStackTrace(e));
-			System.out.println(openId+"---"+nickName+"---"+msg.getStackTrace(e));
+			logger.error("opneId:"+openId+"    nickName"+nickName+
+					"\r\n 错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("userControl addNickName have error");
 		}
 		
+	}
+	
+	
+	@RequestMapping(value="/addModel",method=RequestMethod.POST)
+	@ApiOperation("用户进入index界面并加载完成后发送自己的手机信息")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="modelDoMain",value="接受用户的设备信息",required=true )
+	})
+	public void addModel(ModelDoMain modelDoMain){
+		//把addNickName和addModel分开发送，避免一个函数执行失败造成回滚，两个信息都无法保存
+		
+		//System.out.println(modelDoMain);
+		try {
+			userServiceImp.saveModel(modelDoMain);
+		} catch (Exception e) {
+			// TODO: handle exception
+			ErrorMsg msg=new ErrorMsg();
+			logger.error("modelDoMain：  "+modelDoMain+"\r\n错误原因：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("userControl addModel have error");
+		}
 	}
 	
 

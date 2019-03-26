@@ -11,14 +11,8 @@ public interface InUesrService {
 	
 	public UserDoMain findByOpenId(String openId);
 	
-	public void updateSchoolId(UserDoMain userDoMain,String schoolId);
+	public void saveUser(UserDoMain user);
 	
-	public void updateSessionKey(UserDoMain userDoMain,String sessionKey);
-	
-	public void updateName(UserDoMain userDoMain,String name);
-	
-	public void updateSchoolName(UserDoMain userDoMain,String schoolName);
-
-	public void saveAndFlush(ModelDoMain modelDoMain);
+	public void saveModel(ModelDoMain model);
 
 }

@@ -20,12 +20,6 @@ public class UserServiceImp implements InUesrService {
 	private UserDao userDao;
 	
 	@Autowired
-	private UserDoMain userDoMain1;
-	
-	@Autowired
-	private UserDoMain userDoMain2;
-	
-	@Autowired
 	private ModelDao modelDao;
 
 
@@ -39,20 +33,24 @@ public class UserServiceImp implements InUesrService {
 	}
 	
 	@Transactional
-	public void updateName(UserDoMain userDoMain,String name){
-		try{
-			userDoMain.setName(name);
-		}catch(Exception e){
+	public void saveUser(UserDoMain user){
+		try {
+			userDao.saveAndFlush(user);
+		} catch (Exception e) {
+			// TODO: handle exception
 			throw e;
 		}
+		
 	}
 	
+	@Transactional
 	public  UserDoMain findByOpenId(String openId){
 		try{
-			userDoMain1=userDao.findByOpenId(openId);
+			UserDoMain userDoMain1=userDao.findByOpenId(openId);
 			
 			//看看数据库中是否有这个openid，没有就插入
 			if(userDoMain1==null){
+				UserDoMain userDoMain2=new UserDoMain();
 				userDoMain2.setOpenId(openId);
 				userDao.saveAndFlush(userDoMain2);
 		        return userDoMain2;
@@ -67,38 +65,12 @@ public class UserServiceImp implements InUesrService {
 	}
 	
 	@Transactional
-	public void updateSchoolId(UserDoMain userDoMain,String schoolId){
-		//手动绑定openid和学号的信息
+	public void saveModel(ModelDoMain model){
 		try {
-			userDoMain.setSchoolId(schoolId);
+			modelDao.saveAndFlush(model);
 		} catch (Exception e) {
 			throw e;
 		}
-	}
-	
-	@Transactional
-	public void updateSessionKey(UserDoMain userDoMain,String sessionKey){
-		try {
-			userDoMain.setSessionKey(sessionKey);
-		} catch (Exception e) {
-			throw e;
-		}
-	}
-	
-	@Transactional
-	public void updateSchoolName(UserDoMain userDoMain,String schoolName){
-		try {
-			userDoMain.setSchoolName(schoolName);
-		} catch (Exception e) {
-			throw e;
-		}
-	}
-	
-
-	@Transactional
-	public void saveAndFlush(ModelDoMain modelDoMain) {
-		// TODO Auto-generated method stub
-		modelDao.saveAndFlush(modelDoMain);
 	}
 
 	
