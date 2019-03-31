@@ -37,7 +37,7 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
         <Property name="App">classtime</Property>
-        <Property name="logDir">c:/logs/classtime</Property>
+        <Property name="logDir">c:/classtime/logs</Property>
         <Property name="splitSize">100 MB</Property>
     </Properties>
 

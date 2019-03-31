@@ -89,7 +89,11 @@ public class TimeControl {
     //http://localhost:8080/classtime/time/endTime?openId=orxZW40HVbGQTr2OqE1Bfne8r1z4&dates=jjijijijiji&begain=90909099&ends=kokoko&pause=8&times=989899jiji
 
 	//报告在线
-	@RequestMapping("/online")
+	@RequestMapping(value="/online",method=RequestMethod.POST)
+	@ApiOperation("报告在线")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true )
+	})
 	public void online(@RequestParam String openId){
 		try {
 			timeService.online(openId);
@@ -102,7 +106,11 @@ public class TimeControl {
 	}
 	
 	//报告不在线，暂停
-	@RequestMapping("/suspend")
+	@RequestMapping(value="/suspend",method=RequestMethod.POST)
+	@ApiOperation("报告不在线，暂停")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true )
+	})
 	public void suspend(@RequestParam String openId){
 		try {
 			timeService.suspend(openId);
@@ -114,8 +122,13 @@ public class TimeControl {
 		}
 	}
 	
+	/**
 	//查询某人是否在线
-	@RequestMapping("/queryOnline")
+	@RequestMapping(value="/queryOnline",method=RequestMethod.POST)
+	@ApiOperation("查询某人是否在线")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true )
+	})
 	public Map<String, String> queryOnline(@RequestParam String openId){
 		
 		Map<String, String> map=new HashMap<String, String>();
@@ -134,11 +147,12 @@ public class TimeControl {
 			return map;
 		}
 
-	}
+	}*/
 	
 	
 	//查询排行榜
-	@RequestMapping("/queryRank")
+	@RequestMapping(value="/queryRank",method=RequestMethod.GET)
+	@ApiOperation("查询排行榜")
 	public List<ArrayList< RankDoMain >> queryRank(){
 		try {
 			return rank.queryRank();

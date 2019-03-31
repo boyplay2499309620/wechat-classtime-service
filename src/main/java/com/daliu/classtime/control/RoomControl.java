@@ -194,7 +194,7 @@ public class RoomControl {
 		//System.out.println(roomId+"---"+emailAddress);
 		try {
             String string=rooms.SendEmail(openId, roomId, emailAddress);
-            logger.info(openId+"---"+roomId+"---"+roomId+"---"+string);
+            logger.info(openId+"---"+roomId+"---"+roomId+"---"+string+log);
             //System.out.println("发送成功！"+string);
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();

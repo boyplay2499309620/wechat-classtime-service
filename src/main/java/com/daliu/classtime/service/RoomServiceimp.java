@@ -84,7 +84,7 @@ public class RoomServiceimp implements InRoomService{
 				//System.out.println("这是向前端发送的房间号为"+roomId+"的数据");
 				
 				for(RoomPeopleDoMain roomPeopleDoMain :list){
-					String str=stringRedisTemplate.opsForValue().get(roomPeopleDoMain.getOpenId());
+					String str=stringRedisTemplate.opsForValue().get("time"+roomPeopleDoMain.getOpenId());
 					if(str==null){
 						roomPeopleDoMain.setState(0);
 					}else if(str.equals("ok")){

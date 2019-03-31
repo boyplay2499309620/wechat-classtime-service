@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.daliu.classtime.dao.RoomDao;
@@ -29,9 +30,12 @@ public class GenerateXls {
 	@Autowired
 	private RoomDao roomDao;
 	
+	@Value("${com.classtime.xlsPath}")
+	private String xlsPath;
+	
 	public String CreateXls(Integer roomId) throws Exception{
 		//生成xls文件，返回文件地址
-		String path="C:/xls/"+roomId+".xls";
+		String path=xlsPath+roomId+".xls";
 		try {
 			
 			List<RoomPeopleDoMain> list=roomPeopleDao.findByRoomId(roomId);
