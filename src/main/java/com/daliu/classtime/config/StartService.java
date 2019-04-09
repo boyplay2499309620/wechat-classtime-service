@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.daliu.classtime.dao.RankDao;
 import com.daliu.classtime.dao.UserDao;
-import com.daliu.classtime.domain.ModelDoMain;
 import com.daliu.classtime.domain.RankDoMain;
 import com.daliu.classtime.domain.UserDoMain;
 /**
@@ -58,7 +57,7 @@ public class StartService implements ApplicationRunner {
      * @return:void  
      * @date:2019年3月18日
      */
-    public void loadRedis(){
+    public void loadRedis(){ 
     	System.out.println("******   开始加载redis          ****** ");
         for (int i = 0; i < 10; i++) {
         	redisTemplate.delete("ran"+i);
@@ -70,8 +69,8 @@ public class StartService implements ApplicationRunner {
         int i=0;
         for(RankDoMain rank : list){
         	UserDoMain user=userDao.findByOpenId(rank.getOpenId());
-        	if(user.getSchoolName()!=null) rank.setName(user.getSchoolName());
-        	else rank.setName(user.getName());
+        	if(user.getSchoolName()==null || user.getSchoolName().equals("")) rank.setName(user.getNickName());
+        	else rank.setName(user.getSchoolName());
         	
         	if(user.getSchoolId()!=null) rank.setSchoolId(user.getSchoolId());
         	else rank.setSchoolId("");

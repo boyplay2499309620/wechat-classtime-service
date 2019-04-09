@@ -1,6 +1,7 @@
 com\daliu\classtime\dao\TimeDao.class
 com\daliu\classtime\service\Schedule.class
 com\daliu\classtime\service\UserServiceImp.class
+com\daliu\classtime\service\inservice\InModelService.class
 com\daliu\classtime\domain\Group.class
 com\daliu\classtime\service\inservice\InUesrService.class
 com\daliu\classtime\control\TimeControl.class
@@ -13,6 +14,7 @@ com\daliu\classtime\dao\UserDao.class
 com\daliu\classtime\utils\HttpUtil.class
 com\daliu\classtime\domain\RoomDoMain.class
 com\daliu\classtime\service\inservice\InTimeService.class
+com\daliu\classtime\service\ModelServiceimp.class
 com\daliu\classtime\service\RoomServiceimp.class
 com\daliu\classtime\domain\RoomPeopleDoMain.class
 com\daliu\classtime\service\TimeServiceimp.class
@@ -25,6 +27,7 @@ com\daliu\classtime\config\RedisConfig.class
 com\daliu\classtime\config\StartService.class
 com\daliu\classtime\control\UserControl.class
 com\daliu\classtime\domain\RankDoMain.class
+com\daliu\classtime\control\ImageControl.class
 com\daliu\classtime\utils\ErrorMsg.class
 com\daliu\classtime\service\inservice\InRoomService.class
 com\daliu\classtime\dao\ModelDao.class
@@ -32,4 +35,5 @@ com\daliu\classtime\config\Config.class
 com\daliu\classtime\domain\GroupTwo.class
 com\daliu\classtime\Application.class
 com\daliu\classtime\control\RoomControl.class
+com\daliu\classtime\control\ReidsControl.class
 com\daliu\classtime\service\Ranking.class

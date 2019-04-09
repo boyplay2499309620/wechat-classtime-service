@@ -15,13 +15,17 @@ public class UserDoMain {
 	
 	private String schoolId;
 	
-	private String name;
+	private String nickName;
 	
 	private String sessionKey;
 	
 	private String unionId;
 	
 	private String schoolName;
+	
+	private int sex;
+	
+	private String avatarUrl;
 	
 	public UserDoMain(){
 		//System.out.println("userDoMain create!");
@@ -37,12 +41,12 @@ public class UserDoMain {
 
 	
 
-	public String getName() {
-		return name;
+	public String getNickName() {
+		return nickName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
 	}
 
 	public String getSessionKey() {
@@ -71,8 +75,9 @@ public class UserDoMain {
 
 	@Override
 	public String toString() {
-		return "UserDoMain [openId=" + openId + ", schoolId=" + schoolId + ", name=" + name + ", sessionKey="
-				+ sessionKey + ", unionId=" + unionId + ", schoolName=" + schoolName + "]";
+		return "UserDoMain [openId=" + openId + ", schoolId=" + schoolId + ", nickName=" + nickName + ", sessionKey="
+				+ sessionKey + ", unionId=" + unionId + ", schoolName=" + schoolName + ", sex=" + sex + ", avatarUrl="
+				+ avatarUrl + "]";
 	}
 
 	public String getSchoolName() {
@@ -81,6 +86,22 @@ public class UserDoMain {
 
 	public void setSchoolName(String schoolName) {
 		this.schoolName = schoolName;
+	}
+
+	public int getSex() {
+		return sex;
+	}
+
+	public void setSex(int sex) {
+		this.sex = sex;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avataUrl) {
+		this.avatarUrl = avataUrl;
 	}
 
 	

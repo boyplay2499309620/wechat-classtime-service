@@ -128,7 +128,7 @@ public class RoomControl {
 				map.put("status","3");
 			}
 			
-			//long endTime=System.currentTimeMillis();
+			//long endTime=System.currentTimeMillis(); 
 			//logger.info(openId+"---"+number+"---"+remark+"---"+(endTime-startTime)+"ms"+map);
 			return map;
 		}catch (Exception e) {

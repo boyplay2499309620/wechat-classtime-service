@@ -1,8 +1,6 @@
 package com.daliu.classtime.service;
 
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -57,7 +55,7 @@ public class TimeServiceimp implements InTimeService {
 			//timeDoMain1.setId(null);
 			//System.out.println("service"+timeDoMain1);
 			
-			TimeDoMain timeDoMain=timeDao.save(timeDoMain1);
+			TimeDoMain timeDoMain=timeDao.saveAndFlush(timeDoMain1);
 			
 			//如果加入了房间，则更新room_people表的times字段，将时间加上去
 			if(timeDoMain1.getRoomId()!=1){
@@ -65,20 +63,8 @@ public class TimeServiceimp implements InTimeService {
 				RoomPeopleDoMain roomPeopleDoMain=roomPeopleDao.findByOpenIdAndRoomId(
 						timeDoMain1.getOpenId(), timeDoMain1.getRoomId());
 				if(roomPeopleDoMain!=null){
-					//约定字符串的形状是"00:00:00"
-					//将字符串转化为以秒为单位的int型
-					//防止前端有时候不按格式的字符串传来，换用其他的格式
 					
-					// 创建 Pattern 对象
-			        Pattern r = Pattern.compile("(\\d*):(\\d*):(\\d*)");
-			   
-			        // 现在创建 matcher 对象
-			        Matcher m = r.matcher(timeDoMain1.getTimes());
-			        m.find();
-			        
-					int time=Integer.parseInt(m.group(1)) * 3600+
-							Integer.parseInt(m.group(2)) * 60 + 
-							Integer.parseInt(m.group(3));
+			        int time=timeDoMain1.getTimes();
 					
 					//更新时间
 					if(roomPeopleDoMain.getTimes()==null){
@@ -136,6 +122,16 @@ public class TimeServiceimp implements InTimeService {
 		}else{
 			return false;
 		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.daliu.classtime.service.inservice.InTimeService#findById(java.lang.Integer)
+	 */
+
+	public TimeDoMain findByTimeId(Integer id) {
+		// TODO Auto-generated method stub
+		return timeDao.findByTimeId(id);
 	}
 
 	

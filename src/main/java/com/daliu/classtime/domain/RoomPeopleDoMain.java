@@ -34,11 +34,7 @@ public class RoomPeopleDoMain {
 	
 	private String schoolId;
 	
-	//不在数据库的字段，用于向前端传送是否在线的标志
-	//@NotNull(message = "状态不能为空",groups = Group.class)
-	@Transient  
-	//忽略不了
-	//java.sql.SQLSyntaxErrorException: Unknown column 'roompeople0_.state' in 'field list'
+	@Transient
 	private transient Integer state;
 
 	public String getOpenId() {

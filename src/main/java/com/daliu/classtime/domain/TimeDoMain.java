@@ -13,7 +13,7 @@ public class TimeDoMain {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Integer timeId;
 	
 	private String openId;
 	
@@ -25,7 +25,7 @@ public class TimeDoMain {
 	
 	private int pause;
 	
-	private String times;
+	private int times;
 	
 	private String pauseMsg;
 	
@@ -39,14 +39,6 @@ public class TimeDoMain {
 
 	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	public String getOpenId() {
@@ -89,20 +81,11 @@ public class TimeDoMain {
 		this.pause = pause;
 	}
 
-	@Override
-	public String toString() {
-		return "TimeDoMain [id=" + id + ", openId=" + openId + ", dates=" + dates + ", begain=" + begain + ", ends="
-				+ ends + ", pause=" + pause + ", times=" + times + ", pauseMsg=" + pauseMsg + ", netWorkType="
-				+ netWorkType + ", roomId=" + roomId + "]";
-	}
-
-	
-
-	public String getTimes() {
+	public int getTimes() {
 		return times;
 	}
 
-	public void setTimes(String times) {
+	public void setTimes(int times) {
 		this.times = times;
 	}
 
@@ -120,6 +103,21 @@ public class TimeDoMain {
 
 	public void setNetWorkType(String netWorkType) {
 		this.netWorkType = netWorkType;
+	}
+
+	@Override
+	public String toString() {
+		return "TimeDoMain [timeId=" + timeId + ", openId=" + openId + ", dates=" + dates + ", begain=" + begain
+				+ ", ends=" + ends + ", pause=" + pause + ", times=" + times + ", pauseMsg=" + pauseMsg
+				+ ", netWorkType=" + netWorkType + ", roomId=" + roomId + "]";
+	}
+
+	public Integer getTimeId() {
+		return timeId;
+	}
+
+	public void setTimeId(Integer timeId) {
+		this.timeId = timeId;
 	}
 	
 	

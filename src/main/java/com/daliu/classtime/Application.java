@@ -22,7 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2  
 @EnableScheduling
 //启动swagger注解
-public class Application{
+public class Application {
 	//extends SpringBootServletInitializer
 
     public static void main(String[] args) {

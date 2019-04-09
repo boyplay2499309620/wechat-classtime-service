@@ -5,6 +5,7 @@ import com.daliu.classtime.domain.TimeDoMain;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.daliu.classtime.domain.UserDoMain;
+import com.daliu.classtime.service.ModelServiceimp;
 import com.daliu.classtime.service.TimeServiceimp;
 import com.daliu.classtime.service.UserServiceImp;
 import com.daliu.classtime.utils.*;
@@ -47,6 +48,9 @@ public class UserControl {
 	@Autowired
 	private TimeServiceimp timeServiceimp;
 	
+	@Autowired
+	private ModelServiceimp modelSeviceimp;
+	
 	
 	 /**
      * 小程序端 获取根据小程序端发过来的code获取用户信息
@@ -77,7 +81,7 @@ public class UserControl {
 		try {
 			//System.out.println(pageNum);
 			
-			Sort sort = new Sort(Sort.Direction.DESC, "id");
+			Sort sort = new Sort(Sort.Direction.DESC, "timeId");
 			Pageable pageable = PageRequest.of(pageNum,10, sort);
 			//PageRequest.of(当前查询的是第几页，每页展示多少条数据，sort参数)
 			Page<TimeDoMain> pages=timeServiceimp.findByOpenId(openId, pageable);
@@ -124,28 +128,30 @@ public class UserControl {
 	        userDoMain.setSessionKey(map.get("session_key"));
 	        userServiceImp.saveUser(userDoMain);
 	        
+	        if(userDoMain.getAvatarUrl()==null || userDoMain.getAvatarUrl().equals("")) map.put("userMsgComplete","false");
+	        else{
+	        	map.put("userMsgComplete","true");
+	        	map.put("avatarUrl",userDoMain.getAvatarUrl());
+	        }
+	        
 	        //返回数据库中已有的昵称给前端
-	        if(userDoMain.getName()==null) map.put("nickName","");
-	        else                           map.put("nickName",userDoMain.getName());
+	        if(userDoMain.getNickName()==null) map.put("nickName","");
+	        else   map.put("nickName",userDoMain.getNickName());
 	        
 	        //没有绑定学号或者姓名返回no，否则返回学号和姓名
-	        //System.out.println(userDoMain);
 	        if(userDoMain.getSchoolId()==null ||userDoMain.getSchoolId().equals("") || 
 	        		userDoMain.getSchoolName()==null ||userDoMain.getSchoolName().equals("")){
 	        	map.put("status","no");
 	        }else{
-	        	map.put("status",userDoMain.getSchoolId());
-	        	if(userDoMain.getSchoolName()==null){
-	        		map.put("schoolName","");
-	        	}else{
-	        		map.put("schoolName",userDoMain.getSchoolName());
-	        	}
+	        	map.put("schoolId",userDoMain.getSchoolId());
+	        	map.put("schoolName",userDoMain.getSchoolName());
 	        }
 	        
-	        map.put("session_key",null);
-	        //int i=6/0;
+	        ModelDoMain modelDoMain=modelSeviceimp.findByOpenId(userDoMain.getOpenId());
+	        if(modelDoMain==null || modelDoMain.getModels()==null) map.put("model","");
+	        else  map.put("model",modelDoMain.getModels());
 	        
-	        //System.out.println("微信服务器返回的有关个人信息的数据---"+map);
+	        map.put("session_key",null);
 	        
 	        long endTime=System.currentTimeMillis(); //获取结束时间
 	        
@@ -212,36 +218,45 @@ public class UserControl {
 		
 	}
 	
-	@RequestMapping(value="/addNickName",method=RequestMethod.POST)
+	@RequestMapping(value="/updateUserMsg",method=RequestMethod.POST)
 	@ApiOperation("用户进入index界面并加载完成后发送自己的昵称")
 	@ApiImplicitParams({
 		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true ),
 		@ApiImplicitParam(paramType="query",name="nickName",value="用户的昵称",required=true )
 	})
-	public void addNickName(@RequestParam String openId,
-			@RequestParam String nickName){
+	public void updateUserMsg(@RequestParam String openId,
+			@RequestParam String nickName,
+			@RequestParam String avatarUrl,
+			@RequestParam int sex){
 		//把addNickName和addModel分开发送，避免一个函数执行失败造成回滚，两个信息都无法保存
 		try {
 			//http://localhost:8080/classtime/user/addNickName?nickName=非官方个非官方 & openId=orxZW4-KPDilobrjiLfn2Bdc5mok & brand=LeEco & model=LEX720 & languages=zh_CN & version=6.7.3 & system=Android 6.0.1 & platform=android & sdkVersion=2.4.4
-			//对参数的必要性检查
-			if(openId==null) return;
 			if(StringUtils.getWordCount(nickName)>28) 
 				nickName=StringUtils.getSubString(nickName,28);
+			//特殊情况，前端就是不能传送微信昵称过来
+			if(nickName==null || nickName.equals(""))
+				nickName="unKnow";
+			
+			//对参数的必要性检查
+			if(sex!=0 && sex!=1) new Exception("前端传送的性别是错误的格式");
+			if(StringUtils.getWordCount(avatarUrl)>225) new Exception("前端传送的头像地址太长");
+			if(openId==null) new Exception("收不到前端传送的openId值");
 			
 			//保存昵称
 			//System.out.println(openId+nickName);
 			UserDoMain userDoMain=userServiceImp.findByOpenId(openId);
+			if(userDoMain==null) throw new Exception("数据库中没有前端传送过来的openId,openId值如下："+openId);
 			
-			//特殊情况，前端优势后就是不能传送微信昵称过来
-			if(nickName==null || nickName.equals(""))
-				nickName="unKnow";
-			userDoMain.setName(nickName);
+			userDoMain.setNickName(nickName);
+			userDoMain.setAvatarUrl(avatarUrl);
+			userDoMain.setSex(sex);
+			userDoMain.setOpenId(openId);
+			
 			userServiceImp.saveUser(userDoMain);
 		
 		} catch (Exception e) {
 			ErrorMsg msg=new ErrorMsg();
-			logger.error("opneId:"+openId+"    nickName"+nickName+
-					"\r\n 错误原因：\r\n"+msg.getStackTrace(e)+log);
+			logger.error("错误原因：\r\n"+msg.getStackTrace(e)+log);
 			System.out.println("userControl addNickName have error");
 		}
 		
@@ -255,8 +270,6 @@ public class UserControl {
 	})
 	public void addModel(ModelDoMain modelDoMain){
 		//把addNickName和addModel分开发送，避免一个函数执行失败造成回滚，两个信息都无法保存
-		
-		//System.out.println(modelDoMain);
 		try {
 			userServiceImp.saveModel(modelDoMain);
 		} catch (Exception e) {

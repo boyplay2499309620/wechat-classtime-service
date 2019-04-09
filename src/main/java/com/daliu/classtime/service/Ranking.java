@@ -1,13 +1,7 @@
 package com.daliu.classtime.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.daliu.classtime.dao.RankDao;
 import com.daliu.classtime.dao.UserDao;
 import com.daliu.classtime.domain.RankDoMain;
-import com.daliu.classtime.domain.TimeDoMain;
 import com.daliu.classtime.domain.UserDoMain;
 
 @Service
@@ -75,34 +68,20 @@ public class Ranking {
 	
 	/**
 	 * 
-	 * @Description:(更新总的统计时间，更新排行榜)
-	 * @param:@param timeDoMain   
+	 * @Description:(作用)
+	 * @param:@param openId
+	 * @param:@param time   距离上一次保存后新增的计时时间  
 	 * @return:void  
-	 * @date:2019年3月18日
+	 * @date:2019年4月6日
 	 */
 	@Transactional
-	public void refreshRank(TimeDoMain timeDoMain){
+	public void refreshRank(String openId,int time){
 		try {
-			//约定字符串的形状是"00:00:00"
-			//将字符串转化为以秒为单位的int型
-			//time为该次提交的时间
-			
-			// 创建 Pattern 对象
-	        Pattern r = Pattern.compile("(\\d*):(\\d*):(\\d*)");
-	   
-	        // 现在创建 matcher 对象
-	        Matcher m = r.matcher(timeDoMain.getTimes());
-	        m.find();
-	        
-			int time=Integer.parseInt(m.group(1)) * 3600+
-					Integer.parseInt(m.group(2)) * 60 + 
-					Integer.parseInt(m.group(3));
-			
 			//该用户在系统上的总时间，用来刷新redis的排行榜,time则为该次提交的时间
 			int times=0;
 			
 			//更新数据库记录
-			RankDoMain rankDoMain=rankDao.findByOpenId(timeDoMain.getOpenId());
+			RankDoMain rankDoMain=rankDao.findByOpenId(openId);
 			if(rankDoMain!=null){
 				//该用户已经在本系统上提交过记录了
 				times=time+rankDoMain.getTimes();
@@ -113,7 +92,7 @@ public class Ranking {
 				//构造记录并保存
 				//rankDoMain2.setId(null);
 				RankDoMain rankDoMain2=new RankDoMain();
-				rankDoMain2.setOpenId(timeDoMain.getOpenId());
+				rankDoMain2.setOpenId(openId);
 				rankDoMain2.setTimes(time);
 				rankDao.saveAndFlush(rankDoMain2);
 				
@@ -122,11 +101,12 @@ public class Ranking {
 			}
 			
 			//更新redis的历史记录
-			refreshRedis(timeDoMain.getOpenId(),times);
+			//redis中并不保存历史记录，所以要传入times，周和天榜的总计时信息都在redis中，所以传入新增的计时记录即可
+			historyRank(openId,times);
 			
-			dayRank(timeDoMain,time);
+			dayRank(openId,time);
 			
-			weekRank(timeDoMain,time);
+			weekRank(openId,time);
 			
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -142,7 +122,7 @@ public class Ranking {
 	 * @return:void  
 	 * @date:2019年3月18日
 	 */
-	public void refreshRedis(String openId, int times) {
+	public void historyRank(String openId, int times) {
 		
 		try {
 			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("ran9");
@@ -163,39 +143,26 @@ public class Ranking {
 	
 	
 	//刷新周榜
-	public void weekRank(TimeDoMain timeDoMain,int time){
+	public void weekRank(String openId,int time){
 		
 		try {
 			int times=time;
-			String key="week"+timeDoMain.getOpenId();
+	        
+			String key="week"+openId;
 			String timeString=stringRedisTemplate.opsForValue().get(key);
-			if(timeString==null){
-				//该用户这周第一次提交
-				//得到当前星期数，1-7表示星期日-星期一
-		    	Calendar c=Calendar.getInstance();
-		        c.setTime(new Date());
-		        int weekday=c.get(Calendar.DAY_OF_WEEK);
-		        
-				if(weekday==1){
-					stringRedisTemplate.opsForValue().set(key,String.valueOf(time));
-				}else{
-					stringRedisTemplate.opsForValue().set(key,String.valueOf(time));
-				}
-				
-				
-			}else{
-				//该用户这周已经提交过了
+			if(timeString!=null){
 				//得到用户这周的总数据
 				times+=Integer.parseInt(timeString);
-				stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			}
+			//不设置失效时间了，因为在Schedule.java中已经设置按时失效了
+			stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			
 			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("week9");
-			if(rankDoMain!=null && rankDoMain.getTimes() >= times){
+			if(rankDoMain!=null && rankDoMain.getTimes() >= times){ 
 				//该用户没进前十，不干嘛！
 			}else{
 				//周榜里没有十个人或者该用户进了前十
-				insertRank("week",timeDoMain.getOpenId(),times);
+				insertRank("week",openId,times);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -205,33 +172,26 @@ public class Ranking {
 	}
 	
 	//刷新日榜
-	public void dayRank(TimeDoMain timeDoMain,int time){
+	public void dayRank(String openId,int time){
 		//time是这次提交的数据
 		try {
 			int times=time;
-			String key="days"+timeDoMain.getOpenId();
+			
+			String key="days"+openId;
 			String timeString=stringRedisTemplate.opsForValue().get(key);
-			if(timeString==null){
-				//该用户今天第一次提交
-				SimpleDateFormat df = new SimpleDateFormat("HH");//设置日期格式
-				int i=Integer.parseInt(df.format(new Date()));
-				
-				stringRedisTemplate.opsForValue().set(key,String.valueOf(time),
-						24-i,TimeUnit.HOURS);
-				
-			}else{
-				//该用户今天已经提交过了
+			if(timeString!=null){
 				//得到用户今天的总数据
 				times+=Integer.parseInt(timeString);
-				stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			}
+			//不设置失效时间了，因为在Schedule.java中已经设置按时失效了
+			stringRedisTemplate.opsForValue().set(key,String.valueOf(times));
 			
 			RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get("day9");
 			if(rankDoMain!=null && rankDoMain.getTimes() >= times){
 				//该用户没进前十，不干嘛！
 			}else{
 				//日榜里没有十个人或者该用户进了前十
-				insertRank("day",timeDoMain.getOpenId(),times);
+				insertRank("day",openId,times);
 			}
 			
 		} catch (Exception e) {
@@ -256,15 +216,18 @@ public class Ranking {
 			UserDoMain userDoMain=userDao.findByOpenId(openId);
 			RankDoMain rankDoMain3=new RankDoMain();
 			
-			if(userDoMain.getSchoolName()!=null)
-				rankDoMain3.setName(userDoMain.getSchoolName());
+			if(userDoMain.getSchoolName()==null || userDoMain.getSchoolName().equals(""))
+				rankDoMain3.setName(userDoMain.getNickName());
 			else 
-			rankDoMain3.setName(userDoMain.getName());
+				rankDoMain3.setName(userDoMain.getSchoolName());
 			
 			if(userDoMain.getSchoolId()!=null)
 			rankDoMain3.setSchoolId(userDoMain.getSchoolId());
 			else
 			rankDoMain3.setSchoolId("");
+			
+			if(userDoMain.getAvatarUrl()==null) rankDoMain3.setAvatarUrl("");
+			else rankDoMain3.setAvatarUrl(userDoMain.getAvatarUrl());
 			
 			rankDoMain3.setOpenId(openId);
 			rankDoMain3.setTimes(times);

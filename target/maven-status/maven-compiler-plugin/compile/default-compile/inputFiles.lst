@@ -8,10 +8,12 @@ F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\GenerateXls.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\control\RoomControl.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao\RankDao.java
+F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\inservice\InModelService.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\UserServiceImp.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\domain\Group.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao\RoomPeopleDao.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\inservice\InRoomService.java
+F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\control\ReidsControl.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\TimeServiceimp.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\utils\StringUtils.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\inservice\InUesrService.java
@@ -32,3 +34,5 @@ F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dom
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\utils\HttpUtil.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\Ranking.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao\UserDao.java
+F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\control\ImageControl.java
+F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\ModelServiceimp.java

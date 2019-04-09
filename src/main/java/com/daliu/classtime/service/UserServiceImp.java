@@ -52,6 +52,7 @@ public class UserServiceImp implements InUesrService {
 			if(userDoMain1==null){
 				UserDoMain userDoMain2=new UserDoMain();
 				userDoMain2.setOpenId(openId);
+				userDoMain2.setNickName("unkown");
 				userDao.saveAndFlush(userDoMain2);
 		        return userDoMain2;
 			}else{

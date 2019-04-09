@@ -249,7 +249,7 @@ public class RoomServiceimp implements InRoomService{
 					roomPeopleDoMain1.setSchoolId(user.getSchoolId());
 					if(user.getSchoolName()==null||user.getSchoolName().equals(""))
 						//要是没有绑定学校姓名，就用昵称
-						roomPeopleDoMain1.setName(user.getName());
+						roomPeopleDoMain1.setName(user.getNickName());
 					else roomPeopleDoMain1.setName(user.getSchoolName());
 					
 					roomPeopleDao.save(roomPeopleDoMain1);

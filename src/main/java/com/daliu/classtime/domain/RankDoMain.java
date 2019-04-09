@@ -29,6 +29,9 @@ public class RankDoMain {
 	@Transient
 	private transient String schoolId;
 	
+	@Transient 
+	private transient String avatarUrl;
+	
 	
 	
 	
@@ -59,7 +62,7 @@ public class RankDoMain {
 	@Override
 	public String toString() {
 		return "RankDoMain [id=" + id + ", times=" + times + ", openId=" + openId + ", name=" + name + ", schoolId="
-				+ schoolId + "]";
+				+ schoolId + ", avatarUrl=" + avatarUrl + "]";
 	}
 
 	public String getName() {
@@ -76,6 +79,14 @@ public class RankDoMain {
 
 	public void setSchoolId(String schoolId) {
 		this.schoolId = schoolId;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 }

@@ -17,6 +17,8 @@ public interface InTimeService {
 	
 	public Page<TimeDoMain> findByOpenId(String openId,Pageable pageable);
 	
+	public TimeDoMain findByTimeId(Integer id);
+	
 
 
 }
