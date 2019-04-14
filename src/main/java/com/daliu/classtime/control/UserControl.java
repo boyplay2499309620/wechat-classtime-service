@@ -9,7 +9,7 @@ import com.daliu.classtime.service.ModelServiceimp;
 import com.daliu.classtime.service.TimeServiceimp;
 import com.daliu.classtime.service.UserServiceImp;
 import com.daliu.classtime.utils.*;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -96,7 +96,6 @@ public class UserControl {
 		}
 	}
   
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/getOpenId",method=RequestMethod.GET)
 	@ApiOperation("通过code请求腾讯服务器得到openId")
 	@ApiImplicitParams({
@@ -106,26 +105,39 @@ public class UserControl {
 		long startTime=System.currentTimeMillis();   //获取开始时间
 		long time=0;
 		Map<String, String> map = new HashMap<String ,String>();
+		WxGetOpneIdReturnJson json=null;
 		try{
 			
 			String url = String.format("https://api.weixin.qq.com/sns/jscode2session?"
-	        		+ "appid=%s&secret=%s&js_code=%s&grant_type=authorization_code\n", 
+	        		+ "appid=%s&secret=%s&js_code=%s&grant_type=authorization_code", 
 	        		appid, appsecret, code);
 	        String response = HttpUtil.doGet(url);
 
-	        Gson gson = new Gson();
-	        map = gson.fromJson(response, map.getClass());
-	        //System.out.println(map);
-	        //现在暂且不能获取union_id
+	        ObjectMapper jsonMapper = new ObjectMapper();
+	        json=jsonMapper.readValue(response,WxGetOpneIdReturnJson.class);
+	        
+	        //map.put("errcode","40029");
+	        
+	        if(json.getErrcode()!=null && json.getErrcode()!=0){
+	        	//腾讯服务器返回不正常
+	        	map.put("Errcode",json.getErrcode().toString());
+	        	logger.info("腾讯服务器返回异常，返回值如下"+json+log);
+	        	System.out.println("userControl getopenid TenXun rentrun error");
+	        	return map;
+	        }else{
+	        	map.put("errcode","0");
+	        }
+	        
+	        map.put("openId",json.getOpenid());
 	        
 	        //记录访问腾讯服务器耗时
 	        time=System.currentTimeMillis()-startTime;
 	        
 	        //看看数据库中是否有该openid，若有，不干什么，没有，新建一个用户，插入此openid
-	        UserDoMain userDoMain=userServiceImp.findByOpenId(map.get("openid"));
+	        UserDoMain userDoMain=userServiceImp.findByOpenId(json.getOpenid());
 	        
 	        //保存这次的sessionkey
-	        userDoMain.setSessionKey(map.get("session_key"));
+	        userDoMain.setSessionKey(json.getSession_key());
 	        userServiceImp.saveUser(userDoMain);
 	        
 	        if(userDoMain.getAvatarUrl()==null || userDoMain.getAvatarUrl().equals("")) map.put("userMsgComplete","false");
@@ -151,11 +163,10 @@ public class UserControl {
 	        if(modelDoMain==null || modelDoMain.getModels()==null) map.put("model","");
 	        else  map.put("model",modelDoMain.getModels());
 	        
-	        map.put("session_key",null);
 	        
 	        long endTime=System.currentTimeMillis(); //获取结束时间
 	        
-	        logger.info("openid:"+map.get("openid")+
+	        logger.info("openid:"+json.getOpenid()+
 	        		"    服务器返回时间:"+time+
 	        		"    整个方法的耗时："+(endTime-startTime)+"ms"+log);
 	        //执行logger.info的时间大概在20ms左右，整个方法耗时大概250ms，相比较而言可以接受
@@ -164,7 +175,7 @@ public class UserControl {
 			ErrorMsg msg=new ErrorMsg();
 			long endTime=System.currentTimeMillis(); //获取结束时间
 			
-			logger.error("code:"+code+"    服务器返回数据:"+map+
+			logger.error("code:"+code+"    服务器返回数据:"+json+
 					"\r\n耗时"+(endTime-startTime)+"ms"+
 					"      错误信息如下：\r\n"+msg.getStackTrace(e)+log);
 			System.out.println("UserControl getopenid have error\n");

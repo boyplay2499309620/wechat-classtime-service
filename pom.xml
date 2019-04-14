@@ -80,14 +80,7 @@
      	<groupId>org.springframework.boot</groupId>
     	<artifactId>spring-boot-starter-data-redis</artifactId>
      </dependency>
-	
-	<!-- json处理的工具包 -->
-	<dependency>
-   		<groupId>com.google.code.gson</groupId>
-    	<artifactId>gson</artifactId>
-	</dependency>
-	
-	
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
