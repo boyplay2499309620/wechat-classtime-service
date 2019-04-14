@@ -68,12 +68,17 @@ public class StartService implements ApplicationRunner {
         List<RankDoMain> list=rankDao.findRank();
         int i=0;
         for(RankDoMain rank : list){
+        	
         	UserDoMain user=userDao.findByOpenId(rank.getOpenId());
+        	
         	if(user.getSchoolName()==null || user.getSchoolName().equals("")) rank.setName(user.getNickName());
         	else rank.setName(user.getSchoolName());
         	
         	if(user.getSchoolId()!=null) rank.setSchoolId(user.getSchoolId());
         	else rank.setSchoolId("");
+        	
+        	if(user.getAvatarUrl()==null) rank.setAvatarUrl("");
+			else rank.setAvatarUrl(user.getAvatarUrl());
         	
         	redisTemplate.opsForValue().set("ran"+i,rank);
         	

@@ -68,7 +68,7 @@ public class TimeControl {
 				timeDoMain.setTimeId(null);
 			}
 			
-			//排行榜有时候会出现数值特别巨大的计时的时间，这里检测下，若前端传递的数值过于巨大，则人为抛出错误
+			//排行榜有时候会出现数值特别巨大的计时的时间，这里检测下，若前端传递的数值过于巨大，则人为抛出错误，不插到排行榜上去
 			if(timeDoMain.getTimes()>7200){//大于两个小时
 				System.out.println(""+String.valueOf(timeDoMain.getTimes()));
 				throw new Exception("检测到前端传过来的计时数值特别变态，请检查！！！计时数值为："+timeDoMain.getTimes());
