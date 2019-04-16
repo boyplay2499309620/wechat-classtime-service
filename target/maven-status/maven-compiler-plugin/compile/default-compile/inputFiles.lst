@@ -10,6 +10,7 @@ F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\con
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao\RankDao.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\inservice\InModelService.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\UserServiceImp.java
+F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\utils\WxGetOpneIdReturnJson.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\domain\Group.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\dao\RoomPeopleDao.java
 F:\JAVA\Project\weChat-classTime\classtime\src\main\java\com\daliu\classtime\service\inservice\InRoomService.java

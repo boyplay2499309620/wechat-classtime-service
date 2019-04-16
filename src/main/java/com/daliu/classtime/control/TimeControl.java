@@ -1,8 +1,6 @@
 package com.daliu.classtime.control;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.daliu.classtime.domain.RankDoMain;
 import com.daliu.classtime.domain.TimeDoMain;
 import com.daliu.classtime.service.TimeServiceimp;
-import com.daliu.classtime.service.Ranking;
+import com.daliu.classtime.service.RankServiceimp;
 import com.daliu.classtime.utils.ErrorMsg;
 
 import io.swagger.annotations.Api;
@@ -33,7 +30,7 @@ public class TimeControl {
 	private TimeServiceimp timeService;
 	
 	@Autowired 
-	private Ranking rank;
+	private RankServiceimp rank;
 	
 	private static Logger logger = LogManager.getLogger("control.time");
 	
@@ -140,47 +137,5 @@ public class TimeControl {
 		}
 	}
 	
-	/**
-	//查询某人是否在线
-	@RequestMapping(value="/queryOnline",method=RequestMethod.POST)
-	@ApiOperation("查询某人是否在线")
-	@ApiImplicitParams({
-		@ApiImplicitParam(paramType="query",name="openId",value="openId",required=true )
-	})
-	public Map<String, String> queryOnline(@RequestParam String openId){
-		
-		Map<String, String> map=new HashMap<String, String>();
-		try {
-			if(timeService.queryOnline(openId)){
-				map.put("state","ok");
-			}else{
-				map.put("state","no");
-			}
-			return map;
-		} catch (Exception e) {
-			// TODO: handle exception
-			ErrorMsg msg=new ErrorMsg();
-			logger.error("openId:"+openId+"   错误原因:\r\n"+msg.getStackTrace(e)+log);
-			System.out.println("timeControl queryOnline have error");
-			return map;
-		}
-
-	}*/
-	
-	
-	//查询排行榜
-	@RequestMapping(value="/queryRank",method=RequestMethod.GET)
-	@ApiOperation("查询排行榜")
-	public List<ArrayList< RankDoMain >> queryRank(){
-		try {
-			return rank.queryRank();
-		} catch (Exception e) {
-			// TODO: handle exception
-			ErrorMsg msg=new ErrorMsg();
-			loggerRedis.error("错误原因:\r\n"+msg.getStackTrace(e)+log);
-			System.out.println("timeControl queryRank have error");
-			return null; 
-		}
-	}
 
 }

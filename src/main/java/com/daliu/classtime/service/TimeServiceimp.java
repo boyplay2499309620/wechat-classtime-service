@@ -94,11 +94,8 @@ public class TimeServiceimp implements InTimeService {
 	//在线
     public void online(String openId){
     	try {
-    		//stringRedisTemplate.opsForValue().set(openId,"ok");
-        	//五分钟后就过期
-    		stringRedisTemplate.opsForValue().set("time"+openId, "ok",250,TimeUnit.SECONDS);//向redis里存入数据和设置缓存时间
-        	//stringRedisTemplate.expire(openId,200,TimeUnit.SECONDS);
-        	//System.out.println("online:");	
+        	//由于前端手机屏幕熄灭后就会自动暂停监听，也不会发信息，这里就设置失效时间为60分钟，离线靠暂停时发送的暂停消息处理
+    		stringRedisTemplate.opsForValue().set("time"+openId, "ok",60,TimeUnit.MINUTES);//向redis里存入数据和设置缓存时间	
 		} catch (Exception e) {
 			// TODO: handle exception
 			throw e;

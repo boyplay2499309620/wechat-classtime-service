@@ -35,5 +35,6 @@ com\daliu\classtime\config\Config.class
 com\daliu\classtime\domain\GroupTwo.class
 com\daliu\classtime\Application.class
 com\daliu\classtime\control\RoomControl.class
+com\daliu\classtime\utils\WxGetOpneIdReturnJson.class
 com\daliu\classtime\control\ReidsControl.class
 com\daliu\classtime\service\Ranking.class
