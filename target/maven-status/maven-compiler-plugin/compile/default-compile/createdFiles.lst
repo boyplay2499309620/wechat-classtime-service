@@ -7,6 +7,7 @@ com\daliu\classtime\service\inservice\InUesrService.class
 com\daliu\classtime\control\TimeControl.class
 com\daliu\classtime\utils\StringUtils.class
 com\daliu\classtime\domain\TimeDoMain.class
+com\daliu\classtime\service\inservice\InRankService.class
 com\daliu\classtime\dao\RoomPeopleDao.class
 com\daliu\classtime\dao\RankDao.class
 com\daliu\classtime\dao\RoomDao.class
@@ -34,7 +35,8 @@ com\daliu\classtime\dao\ModelDao.class
 com\daliu\classtime\config\Config.class
 com\daliu\classtime\domain\GroupTwo.class
 com\daliu\classtime\Application.class
+com\daliu\classtime\control\RankControl.class
 com\daliu\classtime\control\RoomControl.class
+com\daliu\classtime\service\RankServiceimp.class
 com\daliu\classtime\utils\WxGetOpneIdReturnJson.class
 com\daliu\classtime\control\ReidsControl.class
-com\daliu\classtime\service\Ranking.class

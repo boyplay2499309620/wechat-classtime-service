@@ -235,42 +235,43 @@ public class RankServiceimp implements InRankService{
 			rankDoMain3.setLove(0);
 			
 			int i=0;
+			//找到需要变动的用户在哪一名,i=0表示第一名
 			while(i<10){
 				//从记录最大的开始循环遍历，找到合适的位置，将该用户插入排行榜
 				RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get(rank+i);
 				if(rankDoMain==null){
 					//第i名没人,直接插入，退出循环
 					redisTemplate.opsForValue().set(rank+i,rankDoMain3);
-					i=100;
+					break;
 				}else if(times>rankDoMain.getTimes()){
 					//该用户比第i名大，将第i名置换成该用户，从原第i名开始，依次后退一名。
-					//redisTemplate.opsForValue().set("ran"+i,rankDoMain3);
-					while(i<10){
-						rankDoMain=(RankDoMain)redisTemplate.opsForValue().get(rank+i);
-						if(rankDoMain==null){
-							//后面都没人了
-							redisTemplate.opsForValue().set(rank+i,rankDoMain3);
-							i=100;
-						}else if(rankDoMain.getOpenId().equals(openId)){
-							//该用户以前就已经在排行榜中，只是现在名词靠前了
-							//覆盖掉该用户，退出循环
-							redisTemplate.opsForValue().set(rank+i,rankDoMain3);
-							i=100;
-						}else{
-							redisTemplate.opsForValue().set(rank+i,rankDoMain3);
-							rankDoMain3=rankDoMain;
-							i++;
-						}
-						
-					}
-					
-					//退出循环
-					i=100;
+					break;
 				}
-				
 				//比较下一个
 				i++;
 			}
+			
+			//从第i个开始，依次后退一名,最后的抛弃掉。第i名前面不可能有该用户，但后面可能有该用户
+			while(i<10){
+				RankDoMain rankDoMain=(RankDoMain)redisTemplate.opsForValue().get(rank+i);
+				if(rankDoMain==null){
+					//后面都没人了
+					redisTemplate.opsForValue().set(rank+i,rankDoMain3);
+					break;
+				}else if(rankDoMain.getOpenId().equals(openId)){
+					//该用户以前就已经在排行榜中，只是现在名词靠前了
+					//覆盖掉该用户，退出循环
+					redisTemplate.opsForValue().set(rank+i,rankDoMain3);
+					break;
+				}else{
+					redisTemplate.opsForValue().set(rank+i,rankDoMain3);
+					rankDoMain3=rankDoMain;
+					i++;
+				}
+				
+			}
+
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			throw e;

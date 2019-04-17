@@ -38,7 +38,7 @@ public class RankControl {
 	
 	static String log="\r\n****************      纪录结束       **********************\r\n";
 	
-	private static Logger loggerRedis = LogManager.getLogger("redis");
+	private static Logger logger = LogManager.getLogger("control.rank");
 	
 	@Autowired 
 	private RankServiceimp rankService;
@@ -58,8 +58,8 @@ public class RankControl {
 		} catch (Exception e) {
 			// TODO: handle exception
 			ErrorMsg msg=new ErrorMsg();
-			loggerRedis.error("错误原因:\r\n"+msg.getStackTrace(e)+log);
-			System.out.println("rankControl queryRank have error,please checkout redis log for error msg");
+			logger.error("错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("rankControl queryRank have error");
 			return null; 
 		}
 	}
@@ -84,7 +84,9 @@ public class RankControl {
 			rankService.clickLove(rankType,ranking);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			ErrorMsg msg=new ErrorMsg();
+			logger.error("错误原因:\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("rankControl clickLove have error");
 		}
 		
 	}

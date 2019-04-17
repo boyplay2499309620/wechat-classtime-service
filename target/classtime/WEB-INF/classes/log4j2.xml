@@ -121,7 +121,25 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
             <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
             <DefaultRolloverStrategy max="100"/>
         </RollingRandomAccessFile>
-        
+
+		<!-- 存储所有debug信息  针对rank类-->
+        <RollingRandomAccessFile name="rankDebugLog" fileName="${logDir}/rank/${App}-rank-debug.log" immediateFlush="true"
+                                 filePattern="${logDir}/rank/$${date:yyyy-MM}/${App}-rank-debug-%d{yyyy-MM-dd}-%i.log.gz"
+                                 append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} [%t] %-5level %l - %msg%xEx%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${splitSize}"/>
+            </Policies>
+            <Filters>
+                <!-- 存储所有info信息  -->
+                <!--<ThresholdFilter level="info" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <!-- 指定每天的最大压缩包个数，默认7个，超过了会覆盖之前的 -->
+            <DefaultRolloverStrategy max="100"/>
+        </RollingRandomAccessFile>
+		        
         <!-- 存储所有debug信息  默认的debug，不针对任何特定类-->
         <RollingRandomAccessFile name="debugLog" fileName="${logDir}/${App}-debug.log" immediateFlush="true"
                                  filePattern="${logDir}/$${date:yyyy-MM}/${App}-debug-%d{MM-dd-yyyy}-%i.log.gz"
@@ -163,6 +181,10 @@ TimeBasedTriggeringPolicy  这个配置需要和filePattern结合使用，
         
         <logger name="control.time" level="info" additivity="false">
         	<appender-ref ref="timeDebugLog"/>
+        </logger>
+        
+        <logger name="control.rank" level="info" additivity="false">
+        	<appender-ref ref="rankDebugLog"/>
         </logger>
         
         <logger name="system" level="info" additivity="false">
