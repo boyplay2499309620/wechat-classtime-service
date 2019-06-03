@@ -64,7 +64,7 @@ public class UserControl {
 	@Value("${com.classtime.appsecret}")
 	String appsecret;
 	
-	@RequestMapping(value="/",method=RequestMethod.GET)
+	@RequestMapping(value="/test",method=RequestMethod.GET)
 	@ApiOperation("测试springboot能否访问")
 	public String test(){
 		return "wellcome to use classtime!";
@@ -153,8 +153,9 @@ public class UserControl {
 	        //没有绑定学号或者姓名返回no，否则返回学号和姓名
 	        if(userDoMain.getSchoolId()==null ||userDoMain.getSchoolId().equals("") || 
 	        		userDoMain.getSchoolName()==null ||userDoMain.getSchoolName().equals("")){
-	        	map.put("status","no");
+	        	map.put("isbind","false");
 	        }else{
+	        	map.put("isbind","true");
 	        	map.put("schoolId",userDoMain.getSchoolId());
 	        	map.put("schoolName",userDoMain.getSchoolName());
 	        }
@@ -184,6 +185,57 @@ public class UserControl {
         
 
     }
+	
+	
+	@RequestMapping(value="/logins",method=RequestMethod.GET)
+	@ApiOperation("客户端存在openId，登录服务器，回传基本信息！")
+	@ApiImplicitParams({
+		@ApiImplicitParam(paramType="query",name="openId",value="前端已存在的openId",required=true )
+	})
+    public Map<String,String> logins(@RequestParam String openId) {
+		try {
+			Map<String,String> map=new HashMap<String, String>();
+			
+			UserDoMain user=userServiceImp.findByOpenId(openId);
+			if(user==null){
+				//数据库中没有这用户
+				map.put("status","no");
+				return map;
+			}
+			
+			if(user.getAvatarUrl()==null || user.getNickName()==null)
+				map.put("userMsgComplete","false");
+			else map.put("userMsgComplete","true");
+			
+			map.put("nickName",user.getNickName());
+			map.put("avatarUrl",user.getAvatarUrl());
+			
+			//没有绑定学号或者姓名返回no，否则返回学号和姓名
+	        if(user.getSchoolId()==null ||user.getSchoolId().equals("") || 
+	        		user.getSchoolName()==null ||user.getSchoolName().equals("")){
+	        	map.put("isbind","false");
+	        }else{
+	        	map.put("isbind","true");
+	        	map.put("schoolId",user.getSchoolId());
+	        	map.put("schoolName",user.getSchoolName());
+	        }
+	        
+	        ModelDoMain modelDoMain=modelSeviceimp.findByOpenId(user.getOpenId());
+	        if(modelDoMain==null || modelDoMain.getModels()==null) map.put("model","");
+	        else  map.put("model",modelDoMain.getModels());
+	        
+	        return map;
+			
+		} catch (Exception e) {
+			ErrorMsg msg=new ErrorMsg();
+			logger.error("openId:"+openId+"\r\n错误信息如下：\r\n"+msg.getStackTrace(e)+log);
+			System.out.println("UserControl logins have error\n");
+			return null;
+		}
+		//return null;
+	}
+	
+	
 	
 	@RequestMapping(value="/schoolId",method=RequestMethod.POST)
 	@ApiOperation("用户绑定学号")

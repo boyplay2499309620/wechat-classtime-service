@@ -33,7 +33,7 @@
             	<artifactId>spring-boot-starter-logging</artifactId>
         	</exclusion>
         	<!-- 打包发布Tomcat用的 -->
-        	  <!-- 
+        	<!--   
         	<exclusion>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-tomcat</artifactId>
@@ -42,7 +42,7 @@
         </exclusions>
     </dependency>
     
-    <!-- 打包发布Tomcat用的 -->     <!--     
+    <!-- 打包发布Tomcat用的 -->          <!-- 
     <dependency>
 	    <groupId>javax.servlet</groupId>
 	    <artifactId>javax.servlet-api</artifactId>
@@ -145,7 +145,7 @@
         </plugin>
         
         <!-- 打包发布Tomcat用的 -->
-          <!-- 
+           <!-- 
         <plugin> 
 			<groupId>org.apache.maven.plugins</groupId> 
 			<artifactId>maven-surefire-plugin</artifactId> 
@@ -153,12 +153,12 @@
 			<skipTests>true</skipTests>	
 			<failOnMissingWebXml>false</failOnMissingWebXml>
 			</configuration> 
-		</plugin> 
-         -->
+		</plugin> -->
+         
         
     </plugins>
     
-    <!--<finalName>classtime</finalName> -->
+    <!-- <finalName>classtime</finalName> -->
     
 </build>
   

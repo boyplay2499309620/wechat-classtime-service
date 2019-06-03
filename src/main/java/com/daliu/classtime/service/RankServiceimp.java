@@ -346,6 +346,13 @@ public class RankServiceimp implements InRankService{
 			rankDoMain.setLove(rankDoMain.getLove()+1);
 			redisTemplate.opsForValue().set(string+ranking, rankDoMain);
 			
+			if(rankType==2){
+				//更新数据库中的rank表的love字段
+				rankDoMain=rankDao.findByOpenId(rankDoMain.getOpenId());
+				rankDoMain.setLove(rankDoMain.getLove()+1);
+				rankDao.saveAndFlush(rankDoMain);
+			}
+			
 		} catch (Exception e) {
 			throw e;
 		}
